@@ -36,14 +36,12 @@
 
 #endif
 
-#define DEFAULT_REST_LENGTH 3 /*default rest length for each threadpiece*/
+#define DEFAULT_REST_LENGTH 6 /*default rest length for each threadpiece*/
 #define LENGTH_THRESHHOLD 0.5 /*we must be this much shorter than the total length */
 
-#define REFINE_THRESHHOLD 0.5
-#define REFINE_SINGLE_THRESHHOLD 0.7
+#define REFINE_THRESHHOLD 0.6
 #define UNREFINE_THRESHHOLD 0.2 /*must be smaller than REFINE_THRESHHOLD otherwise thread will be unstable */
-#define NATURAL_REST_LENGTH 3.0
-#define REFINEMENT_DEPTH 4
+#define MAX_REFINEMENT_DEPTH 3
 
 #define INTERSECTION_PUSHBACK_EPS 0.03 
 //#define NUM_THREADS_PARALLEL_FOR 2
@@ -287,14 +285,13 @@ class Thread
     void fix_intersections();
     
     //variable-length thread_pieces
-    //void split_thread_piece(int thread_piece_ind);
-    //void merge_thread_piece(int thread_piece_ind);
-    
     void split_thread_piece(ThreadPiece* this_piece, ThreadPiece* this_piece_backup);
     void merge_thread_piece(ThreadPiece* this_piece, ThreadPiece* this_piece_backup);
     void adapt_links();
     void refine_links();
     void unrefine_links();
+    bool needs_refine(ThreadPiece* piece);
+    bool needs_unrefine(ThreadPiece* piece);
 
   //protected:
     vector<ThreadPiece*> _thread_pieces;

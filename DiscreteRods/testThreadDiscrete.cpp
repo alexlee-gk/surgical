@@ -969,12 +969,12 @@ void updateThreadPoints()
 
 void initThread()
 {
-  int numInit = 9;
+  int numInit = 3;//(3*3)/DEFAULT_REST_LENGTH;
   double noise_factor = 0.0;
 
-	double end_length = 3.0;
-	double start = 3.0;//8.0;
-	double end = 3.0;//1.0;
+	double end_length = DEFAULT_REST_LENGTH;
+	double start = DEFAULT_REST_LENGTH;//8.0;
+	double end = DEFAULT_REST_LENGTH;//1.0;
 	double m = (start-end)/(numInit-1);
 
   vector<Vector3d> vertices;
@@ -1048,8 +1048,6 @@ void initThread()
 	lengths.push_back(end_length);
 	
   //angles.resize(vertices.size());
-  
- 	cout << "vertices.size(): " << vertices.size() << endl;
 
   rotations[0] = Matrix3d::Identity();
   rotations[1] = Matrix3d::Identity();
@@ -1082,11 +1080,6 @@ void initThread()
 
   std::cout << "energy: " << calculate_energy() << std::endl;
   */
-	
-	cout << "rest_lengths: ";
-	for (int i=0; i<lengths.size(); i++)
-		cout << lengths[i] << " ";
-	cout << endl;
 	
   thread = new Thread(vertices, angles, lengths, rotations[0], rotations[1]);
   updateThreadPoints();

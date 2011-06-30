@@ -28,8 +28,8 @@ class Thread;
 class ThreadPiece
 {
   public:
-    ThreadPiece(const Vector3d& vertex, const double angle_twist, const double rest_length, Thread* my_thread);
-    ThreadPiece(const Vector3d& vertex, const double angle_twist, const double rest_length, ThreadPiece* prev, ThreadPiece* next, Thread* my_thread);
+    ThreadPiece(const Vector3d& vertex, const double angle_twist, const double rest_length, const int depth, Thread* my_thread);
+    ThreadPiece(const Vector3d& vertex, const double angle_twist, const double rest_length, const int depth, ThreadPiece* prev, ThreadPiece* next, Thread* my_thread);
     ThreadPiece(const ThreadPiece& rhs);
     ThreadPiece(const ThreadPiece& rhs, Thread* my_thread);
 
@@ -110,6 +110,7 @@ class ThreadPiece
     const Vector3d& vertex(void) const {return _vertex;}
     const double angle_twist(void) const {return _angle_twist;}
     const double rest_length(void) const {return _rest_length;}
+    const int depth(void) const {return _depth;}
 
  // protected:
     ThreadPiece* _prev_piece;
@@ -127,6 +128,7 @@ class ThreadPiece
     Matrix3d _bishop_frame;
 
     Thread* _my_thread;
+    int _depth;
 
 
     void calculateBinormal(const double rest_length_prev, const Vector3d& edge_prev, 

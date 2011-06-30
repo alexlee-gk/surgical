@@ -14,7 +14,7 @@ Thread::Thread(const VectorXd& vertices, const VectorXd& twists, const Matrix3d&
   _angle_twist_backup.resize(twists.size());
   for (int i=0; i < twists.size(); i++)
   {
-    _thread_pieces[i] = new ThreadPiece(vertices.segment<3>(3*i), twists(i), DEFAULT_REST_LENGTH, this);
+    _thread_pieces[i] = new ThreadPiece(vertices.segment<3>(3*i), twists(i), DEFAULT_REST_LENGTH, 0, this);
   }
 
   for (int i=1; i < twists.size(); i++)
@@ -36,7 +36,7 @@ Thread::Thread(const VectorXd& vertices, const VectorXd& twists, const Matrix3d&
   //setup backups
   for (int i=0; i < twists.size(); i++)
     {
-      _thread_pieces_backup[i] = new ThreadPiece(vertices.segment<3>(3*i), twists(i), DEFAULT_REST_LENGTH, this);
+      _thread_pieces_backup[i] = new ThreadPiece(vertices.segment<3>(3*i), twists(i), DEFAULT_REST_LENGTH, 0, this);
     }
 
   for (int i=1; i < twists.size(); i++)
@@ -71,7 +71,7 @@ Thread::Thread(vector<Vector3d>& vertices, vector<double>& twist_angles, Matrix3
   _angle_twist_backup.resize(vertices.size());
   for (int i=0; i < vertices.size(); i++)
   {
-    _thread_pieces[i] = new ThreadPiece(vertices[i], twist_angles[i], DEFAULT_REST_LENGTH, this);
+    _thread_pieces[i] = new ThreadPiece(vertices[i], twist_angles[i], DEFAULT_REST_LENGTH, 0, this);
 //    _thread_pieces.push_back(ThreadPiece(vertices[i], twist_angles[i]));
   }
 
@@ -94,7 +94,7 @@ Thread::Thread(vector<Vector3d>& vertices, vector<double>& twist_angles, Matrix3
 	//setup backups
   for (int i=0; i < vertices.size(); i++)
   {
-    _thread_pieces_backup[i] = new ThreadPiece(vertices[i], twist_angles[i], DEFAULT_REST_LENGTH, this);
+    _thread_pieces_backup[i] = new ThreadPiece(vertices[i], twist_angles[i], DEFAULT_REST_LENGTH, 0, this);
   }
 
   for (int i=1; i < vertices.size(); i++)
@@ -135,7 +135,7 @@ Thread::Thread(vector<Vector3d>& vertices, vector<double>& twist_angles, Matrix3
   _angle_twist_backup.resize(vertices.size());
   for (int i=0; i < vertices.size(); i++)
   {
-    _thread_pieces[i] = new ThreadPiece(vertices[i], twist_angles[i], rest_length, this);
+    _thread_pieces[i] = new ThreadPiece(vertices[i], twist_angles[i], rest_length, 0, this);
 //    _thread_pieces.push_back(ThreadPiece(vertices[i], twist_angles[i]));
   }
 
@@ -158,7 +158,7 @@ Thread::Thread(vector<Vector3d>& vertices, vector<double>& twist_angles, Matrix3
 	//setup backups
   for (int i=0; i < vertices.size(); i++)
   {
-    _thread_pieces_backup[i] = new ThreadPiece(vertices[i], twist_angles[i], rest_length, this);
+    _thread_pieces_backup[i] = new ThreadPiece(vertices[i], twist_angles[i], rest_length, 0, this);
   }
 
   for (int i=1; i < vertices.size(); i++)
@@ -201,7 +201,7 @@ Thread::Thread(vector<Vector3d>& vertices, vector<double>& twist_angles, Matrix3
   _thread_pieces.resize(vertices.size());
   for (int i=0; i < vertices.size(); i++)
   {
-    _thread_pieces[i] = new ThreadPiece(vertices[i], twist_angles[i], DEFAULT_REST_LENGTH, this);
+    _thread_pieces[i] = new ThreadPiece(vertices[i], twist_angles[i], DEFAULT_REST_LENGTH, 0, this);
   }
 
   for (int i=1; i < vertices.size(); i++)
@@ -223,7 +223,7 @@ Thread::Thread(vector<Vector3d>& vertices, vector<double>& twist_angles, Matrix3
 	//setup backups
   for (int i=0; i < vertices.size(); i++)
   {
-    _thread_pieces_backup[i] = new ThreadPiece(vertices[i], twist_angles[i], DEFAULT_REST_LENGTH, this);
+    _thread_pieces_backup[i] = new ThreadPiece(vertices[i], twist_angles[i], DEFAULT_REST_LENGTH, 0, this);
     //_thread_pieces.push_back(ThreadPiece(vertices[i], twist_angles[i]));
   }
 
@@ -331,7 +331,7 @@ Thread::Thread(vector<Vector3d>& vertices, vector<double>& twist_angles, vector<
   _thread_pieces.resize(vertices.size());
   for (int i=0; i < vertices.size(); i++)
   {
-    _thread_pieces[i] = new ThreadPiece(vertices[i], twist_angles[i], rest_lengths[i], this);
+    _thread_pieces[i] = new ThreadPiece(vertices[i], twist_angles[i], rest_lengths[i], 0, this);
   }
 
   for (int i=1; i < vertices.size(); i++)
@@ -353,7 +353,7 @@ Thread::Thread(vector<Vector3d>& vertices, vector<double>& twist_angles, vector<
 	//setup backups
   for (int i=0; i < vertices.size(); i++)
   {
-    _thread_pieces_backup[i] = new ThreadPiece(vertices[i], twist_angles[i], rest_lengths[i], this);
+    _thread_pieces_backup[i] = new ThreadPiece(vertices[i], twist_angles[i], rest_lengths[i], 0, this);
   }
 
   for (int i=1; i < vertices.size(); i++)
@@ -968,9 +968,7 @@ void Thread::merge_thread_piece(int thread_piece_ind)
 	//minimize_energy();
 }*/
 
-//NATURAL_REST_LENGTH 3.0
-//REFINEMENT_DEPTH 4
-
+// Splits the edge represented by this_piece.
 void Thread::split_thread_piece(ThreadPiece* this_piece, ThreadPiece* this_piece_backup)
 {
 	ThreadPiece* new_piece = new ThreadPiece();
@@ -989,6 +987,7 @@ void Thread::split_thread_piece(ThreadPiece* this_piece, ThreadPiece* this_piece
 	_thread_pieces_backup.insert(_thread_pieces_backup.begin() + piece_ind + 1, new_piece_backup);
 }
 
+// Merges the edges adjacent to this_piece->_vertex.
 void Thread::merge_thread_piece(ThreadPiece* this_piece, ThreadPiece* this_piece_backup)
 {	
 	this_piece->mergePiece();
@@ -1010,53 +1009,197 @@ void Thread::merge_thread_piece(ThreadPiece* this_piece, ThreadPiece* this_piece
 
 void Thread::adapt_links()
 {
-	refine_links();
 	unrefine_links();
+	refine_links();
 }
 
 void Thread::refine_links()
 {
 	ThreadPiece * curr_piece, * curr_piece_backup;
-	ThreadPiece * next_piece = _thread_pieces[1], * next_piece_backup = _thread_pieces_backup[1];
-	if (next_piece == NULL)
-		cout << "Internal error: Thread::refine_links." << endl;
-	while (next_piece->_next_piece!=NULL) {
-		curr_piece = next_piece;
-		curr_piece_backup = next_piece_backup;
-		next_piece = next_piece->_next_piece;
-		next_piece_backup = next_piece_backup->_next_piece;
-		if ((curr_piece->curvature_binormal_norm() > REFINE_THRESHHOLD) &&
-				(curr_piece->_next_piece->curvature_binormal_norm() > REFINE_THRESHHOLD)) {
-			split_thread_piece(curr_piece, curr_piece_backup);
-			minimize_energy();
-		} else if (curr_piece->curvature_binormal_norm() > REFINE_SINGLE_THRESHHOLD) {
-			if (curr_piece->_next_piece->curvature_binormal_norm() > curr_piece->_prev_piece->curvature_binormal_norm()) {
-				split_thread_piece(curr_piece, curr_piece_backup);
-			} else {
-				split_thread_piece(curr_piece->_prev_piece, curr_piece_backup->_prev_piece);
-			}
-			minimize_energy();
+	vector<ThreadPiece*> to_refine, to_refine_backup;
+	for (int depth = 0; depth < MAX_REFINEMENT_DEPTH; depth++) {
+		to_refine.clear();
+		to_refine_backup.clear();
+		curr_piece = _thread_pieces[1];
+		curr_piece_backup = _thread_pieces_backup[1];
+		if ((curr_piece == NULL) || (curr_piece->_next_piece == NULL))
+			cout << "Internal error: Thread::refine_links." << endl;		
+		while (curr_piece->_next_piece->_next_piece!=NULL) {
+			if ( needs_refine(curr_piece) && (depth == max(curr_piece->depth(), curr_piece->_next_piece->depth())) ) {
+				to_refine.push_back(curr_piece);
+				to_refine_backup.push_back(curr_piece_backup);
+			}			
+			curr_piece = curr_piece->_next_piece;
+			curr_piece_backup = curr_piece_backup->_next_piece;
 		}
+		//start debug
+		bool debug_print = to_refine.size() > 0;
+		if (debug_print) {
+			cout << "-------------SPLIT-----------------------" << endl;
+			cout << "_thread_pieces->curvature_binormal_norm(): " << endl;
+			for (int piece_ind=0; piece_ind < _thread_pieces.size(); piece_ind++) {
+				cout << _thread_pieces[piece_ind]->curvature_binormal_norm() << " ";
+			}
+			cout << endl;
+			cout << "_thread_pieces->depth(): " << endl;
+			for (int piece_ind=0; piece_ind < _thread_pieces.size(); piece_ind++) {
+				cout << _thread_pieces[piece_ind]->depth() << " ";
+			}
+			cout << endl;
+			cout << "_thread_pieces->rest_length(): " << endl;
+			for (int piece_ind=0; piece_ind < _thread_pieces.size(); piece_ind++) {
+				cout << _thread_pieces[piece_ind]->rest_length() << " ";
+			}
+			cout << endl;
+			cout << "to_refine->curvature_binormal_norm(): " << endl;
+			for (int piece_ind=0; piece_ind < to_refine.size(); piece_ind++) {
+				cout << to_refine[piece_ind]->curvature_binormal_norm() << " ";
+			}
+			cout << endl;
+			cout << "to_refine->depth(): " << endl;
+			for (int piece_ind=0; piece_ind < to_refine.size(); piece_ind++) {
+				cout << to_refine[piece_ind]->depth() << " ";
+			}
+			cout << endl;
+		}
+		//end debug
+		for (int piece_ind=0; piece_ind < to_refine.size(); piece_ind++) {
+			split_thread_piece(to_refine[piece_ind], to_refine_backup[piece_ind]);
+		}
+		minimize_energy();
+		//start debug
+		if (debug_print) {
+			cout << "\\---------------------------------------/" << endl;
+			cout << "_thread_pieces->curvature_binormal_norm(): " << endl;
+			for (int piece_ind=0; piece_ind < _thread_pieces.size(); piece_ind++) {
+				cout << _thread_pieces[piece_ind]->curvature_binormal_norm() << " ";
+			}
+			cout << endl;
+			cout << "_thread_pieces->depth(): " << endl;
+			for (int piece_ind=0; piece_ind < _thread_pieces.size(); piece_ind++) {
+				cout << _thread_pieces[piece_ind]->depth() << " ";
+			}
+			cout << endl;
+			cout << "_thread_pieces->rest_length(): " << endl;
+			for (int piece_ind=0; piece_ind < _thread_pieces.size(); piece_ind++) {
+				cout << _thread_pieces[piece_ind]->rest_length() << " ";
+			}
+			cout << endl;
+			cout << "to_refine->curvature_binormal_norm(): " << endl;
+			for (int piece_ind=0; piece_ind < to_refine.size(); piece_ind++) {
+				cout << to_refine[piece_ind]->curvature_binormal_norm() << " ";
+			}
+			cout << endl;
+			cout << "to_refine->depth(): " << endl;
+			for (int piece_ind=0; piece_ind < to_refine.size(); piece_ind++) {
+				cout << to_refine[piece_ind]->depth() << " ";
+			}
+			cout << endl;
+		}
+		//end debug
 	}
 }
 
 void Thread::unrefine_links()
 {
 	ThreadPiece * curr_piece, * curr_piece_backup;
-	ThreadPiece * next_piece = _thread_pieces[2], * next_piece_backup = _thread_pieces_backup[2];
-	if (next_piece == NULL || next_piece->_next_piece==NULL)
-		cout << "Internal error: Thread::unrefine_links." << endl;
-	while (next_piece->_next_piece->_next_piece!=NULL) {
-		curr_piece = next_piece;
-		curr_piece_backup = next_piece_backup;
-		next_piece = next_piece->_next_piece;
-		next_piece_backup = next_piece_backup->_next_piece;
-		if (curr_piece->curvature_binormal_norm() < UNREFINE_THRESHHOLD) {
-			merge_thread_piece(curr_piece, curr_piece_backup);
-			minimize_energy();
+	vector<ThreadPiece*> to_unrefine, to_unrefine_backup;
+	for (int depth = MAX_REFINEMENT_DEPTH; depth > 0; depth--) {
+		to_unrefine.clear();
+		to_unrefine_backup.clear();
+		curr_piece = _thread_pieces[2];
+		curr_piece_backup = _thread_pieces_backup[2];
+		if ((curr_piece == NULL) || (curr_piece->_next_piece == NULL))
+			cout << "Internal error: Thread::unrefine_links." << endl;		
+		while (curr_piece->_next_piece->_next_piece!=NULL) {
+			if ( needs_unrefine(curr_piece) && (depth == curr_piece->depth()) &&
+					 (depth > curr_piece->_next_piece->depth()) && (depth > curr_piece->_prev_piece->depth()) ) {
+				to_unrefine.push_back(curr_piece);
+				to_unrefine_backup.push_back(curr_piece_backup);
+			}			
+			curr_piece = curr_piece->_next_piece;
+			curr_piece_backup = curr_piece_backup->_next_piece;
 		}
+		//start debug
+		bool debug_print = to_unrefine.size() > 0;
+		if (debug_print) {
+			cout << "--------------MERGE----------------------" << endl;
+			cout << "_thread_pieces->curvature_binormal_norm(): " << endl;
+			for (int piece_ind=0; piece_ind < _thread_pieces.size(); piece_ind++) {
+				cout << _thread_pieces[piece_ind]->curvature_binormal_norm() << " ";
+			}
+			cout << endl;
+			cout << "_thread_pieces->depth(): " << endl;
+			for (int piece_ind=0; piece_ind < _thread_pieces.size(); piece_ind++) {
+				cout << _thread_pieces[piece_ind]->depth() << " ";
+			}
+			cout << endl;
+			cout << "_thread_pieces->rest_length(): " << endl;
+			for (int piece_ind=0; piece_ind < _thread_pieces.size(); piece_ind++) {
+				cout << _thread_pieces[piece_ind]->rest_length() << " ";
+			}
+			cout << endl;
+			cout << "to_unrefine->curvature_binormal_norm(): " << endl;
+			for (int piece_ind=0; piece_ind < to_unrefine.size(); piece_ind++) {
+				cout << to_unrefine[piece_ind]->curvature_binormal_norm() << " ";
+			}
+			cout << endl;
+			cout << "to_unrefine->depth(): " << endl;
+			for (int piece_ind=0; piece_ind < to_unrefine.size(); piece_ind++) {
+				cout << to_unrefine[piece_ind]->depth() << " ";
+			}
+			cout << endl;
+		}
+		//end debug
+		for (int piece_ind=0; piece_ind < to_unrefine.size(); piece_ind++) {
+			merge_thread_piece(to_unrefine[piece_ind], to_unrefine_backup[piece_ind]);
+		}
+		minimize_energy();
+		//start debug
+		if (debug_print) {
+			cout << "\\---------------------------------------/" << endl;
+			cout << "_thread_pieces->curvature_binormal_norm(): " << endl;
+			for (int piece_ind=0; piece_ind < _thread_pieces.size(); piece_ind++) {
+				cout << _thread_pieces[piece_ind]->curvature_binormal_norm() << " ";
+			}
+			cout << endl;
+			cout << "_thread_pieces->depth(): " << endl;
+			for (int piece_ind=0; piece_ind < _thread_pieces.size(); piece_ind++) {
+				cout << _thread_pieces[piece_ind]->depth() << " ";
+			}
+			cout << endl;
+			cout << "_thread_pieces->rest_length(): " << endl;
+			for (int piece_ind=0; piece_ind < _thread_pieces.size(); piece_ind++) {
+				cout << _thread_pieces[piece_ind]->rest_length() << " ";
+			}
+			cout << endl;
+			cout << "to_unrefine->curvature_binormal_norm(): " << endl;
+			for (int piece_ind=0; piece_ind < to_unrefine.size(); piece_ind++) {
+				cout << to_unrefine[piece_ind]->curvature_binormal_norm() << " ";
+			}
+			cout << endl;
+			cout << "to_unrefine->depth(): " << endl;
+			for (int piece_ind=0; piece_ind < to_unrefine.size(); piece_ind++) {
+				cout << to_unrefine[piece_ind]->depth() << " ";
+			}
+			cout << endl;
+		}
+		//end debug
 	}
+}	
+
+// Does the edge specified by piece->_edge need to be refined?
+bool Thread::needs_refine(ThreadPiece* piece)
+{
+	return ((piece->curvature_binormal_norm() > REFINE_THRESHHOLD) && (piece->_next_piece->curvature_binormal_norm() > REFINE_THRESHHOLD));
 }
+
+// Does the vertex especified by piece->_vertex need to be unrefined?
+bool Thread::needs_unrefine(ThreadPiece* piece)
+{
+	return (piece->curvature_binormal_norm() < UNREFINE_THRESHHOLD);
+}
+
 //end variable-length thread_pieces
 /*********************************************************************************/
 

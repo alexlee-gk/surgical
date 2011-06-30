@@ -11,16 +11,16 @@ ThreadPiece::ThreadPiece() :
 }
 
 
-	ThreadPiece::ThreadPiece(const Vector3d& vertex, const double angle_twist, const double rest_length, Thread* my_thread)
-: _vertex(vertex), _angle_twist(angle_twist), _rest_length(rest_length), _prev_piece(NULL), _next_piece(NULL), rot(Matrix3d::Zero()), _my_thread(my_thread)
+	ThreadPiece::ThreadPiece(const Vector3d& vertex, const double angle_twist, const double rest_length, const int depth, Thread* my_thread)
+: _vertex(vertex), _angle_twist(angle_twist), _rest_length(rest_length), _depth(depth), _prev_piece(NULL), _next_piece(NULL), rot(Matrix3d::Zero()), _my_thread(my_thread)
 {
 	grad_offsets[0] = Vector3d(grad_eps, 0.0, 0.0);
 	grad_offsets[1] = Vector3d(0.0, grad_eps, 0.0);
 	grad_offsets[2] = Vector3d(0.0, 0.0, grad_eps);
 }
 
-	ThreadPiece::ThreadPiece(const Vector3d& vertex, const double angle_twist, const double rest_length, ThreadPiece* prev, ThreadPiece* next, Thread* my_thread)
-: _vertex(vertex), _angle_twist(angle_twist), _rest_length(rest_length), rot(Matrix3d::Zero()), _my_thread(my_thread)
+	ThreadPiece::ThreadPiece(const Vector3d& vertex, const double angle_twist, const double rest_length, const int depth, ThreadPiece* prev, ThreadPiece* next, Thread* my_thread)
+: _vertex(vertex), _angle_twist(angle_twist), _rest_length(rest_length), _depth(depth), rot(Matrix3d::Zero()), _my_thread(my_thread)
 {
 	grad_offsets[0] = Vector3d(grad_eps, 0.0, 0.0);
 	grad_offsets[1] = Vector3d(0.0, grad_eps, 0.0);
@@ -31,7 +31,7 @@ ThreadPiece::ThreadPiece() :
 
 
 	ThreadPiece::ThreadPiece(const ThreadPiece& rhs)
-: _vertex(rhs._vertex), _angle_twist(rhs._angle_twist), _rest_length(rhs._rest_length), _edge(rhs._edge), _edge_norm(rhs._edge_norm), _curvature_binormal(rhs._curvature_binormal), _bishop_frame(rhs._bishop_frame), _material_frame(rhs._material_frame), _prev_piece(rhs._prev_piece), _next_piece(rhs._next_piece), _my_thread(rhs._my_thread)
+: _vertex(rhs._vertex), _angle_twist(rhs._angle_twist), _rest_length(rhs._rest_length), _depth(rhs._depth), _edge(rhs._edge), _edge_norm(rhs._edge_norm), _curvature_binormal(rhs._curvature_binormal), _bishop_frame(rhs._bishop_frame), _material_frame(rhs._material_frame), _prev_piece(rhs._prev_piece), _next_piece(rhs._next_piece), _my_thread(rhs._my_thread)
 {
 	grad_offsets[0] = Vector3d(grad_eps, 0.0, 0.0);
 	grad_offsets[1] = Vector3d(0.0, grad_eps, 0.0);
@@ -40,7 +40,7 @@ ThreadPiece::ThreadPiece() :
 }
 	
   ThreadPiece::ThreadPiece(const ThreadPiece& rhs, Thread* my_thread)
-: _vertex(rhs._vertex), _angle_twist(rhs._angle_twist), _rest_length(rhs._rest_length), _edge(rhs._edge), _edge_norm(rhs._edge_norm), _curvature_binormal(rhs._curvature_binormal), _bishop_frame(rhs._bishop_frame), _material_frame(rhs._material_frame), _prev_piece(rhs._prev_piece), _next_piece(rhs._next_piece), _my_thread(my_thread)
+: _vertex(rhs._vertex), _angle_twist(rhs._angle_twist), _rest_length(rhs._rest_length), _depth(rhs._depth), _edge(rhs._edge), _edge_norm(rhs._edge_norm), _curvature_binormal(rhs._curvature_binormal), _bishop_frame(rhs._bishop_frame), _material_frame(rhs._material_frame), _prev_piece(rhs._prev_piece), _next_piece(rhs._next_piece), _my_thread(my_thread)
 {
 	grad_offsets[0] = Vector3d(grad_eps, 0.0, 0.0);
 	grad_offsets[1] = Vector3d(0.0, grad_eps, 0.0);
@@ -802,6 +802,7 @@ void ThreadPiece::splitPiece(ThreadPiece* new_piece)
 	new_piece->_bishop_frame = _bishop_frame;
 	new_piece->_material_frame = _material_frame;
 	new_piece->_rest_length = _rest_length = _rest_length/2.0;
+	new_piece->_depth = max(_depth, _next_piece->_depth)+1;
 	
 	fixPointersSplit(new_piece);
 	
@@ -826,6 +827,7 @@ void ThreadPiece::mergePiece()
 	intermediate_rotation(_bishop_frame, _prev_piece->_bishop_frame, _bishop_frame);
 	intermediate_rotation(_material_frame, _prev_piece->_material_frame, _material_frame);
 	_rest_length = _prev_piece->_rest_length + _rest_length;
+	_depth = _prev_piece->_depth;
 	
 	fixPointersMerge();
 	
@@ -858,6 +860,7 @@ ThreadPiece& ThreadPiece::operator=(const ThreadPiece& rhs)
 	_bishop_frame = rhs._bishop_frame;
 	_material_frame = rhs._material_frame;
 	_rest_length = rhs._rest_length;
+	_depth = rhs._depth;
 
   _prev_piece = rhs._prev_piece;
   _next_piece = rhs._next_piece;
@@ -879,6 +882,7 @@ void ThreadPiece::copyData(const ThreadPiece& rhs)
 	_bishop_frame = rhs._bishop_frame;
 	_material_frame = rhs._material_frame;
   _rest_length = rhs._rest_length;
+  _depth = rhs._depth;
 
 
 }
