@@ -3,6 +3,7 @@
 
 #include "threadutils_discrete.h"
 #include <math.h>
+#include <time.h>
 
 
 
@@ -95,10 +96,17 @@ class ThreadPiece
 		//double calculate_holonomy();
 
     //variable-length thread_pieces
+    int _depth;
+    time_t _inter_time;
+    bool _just_intersected;
     void splitPiece(ThreadPiece* new_piece);
     void mergePiece();
     void fixPointersSplit(ThreadPiece* new_piece);
 		void fixPointersMerge();
+		void intersectionUpdate();
+		double timeSinceIntersection();
+		bool justIntersected();
+		void resetJustIntersected();
 
 		void copyData(const ThreadPiece& rhs);
     void set_my_thread(Thread* my_thread){_my_thread = my_thread;};
@@ -128,8 +136,6 @@ class ThreadPiece
     Matrix3d _bishop_frame;
 
     Thread* _my_thread;
-    int _depth;
-
 
     void calculateBinormal(const double rest_length_prev, const Vector3d& edge_prev, 
 													 const double rest_length_after, const Vector3d& edge_after, Vector3d& binormal);

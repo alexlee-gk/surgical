@@ -42,6 +42,7 @@
 #define REFINE_THRESHHOLD 0.6
 #define UNREFINE_THRESHHOLD 0.2 /*must be smaller than REFINE_THRESHHOLD otherwise thread will be unstable */
 #define MAX_REFINEMENT_DEPTH 3
+#define TIME_BEFORE_UNREFINE 2.0
 
 #define INTERSECTION_PUSHBACK_EPS 0.03 
 //#define NUM_THREADS_PARALLEL_FOR 2
@@ -282,15 +283,19 @@ class Thread
     double intersection(const Vector3d& a_start_in, const Vector3d& a_end_in, const double a_radius, const Vector3d& b_start_in, const Vector3d& b_end_in, const double b_radius);
 
     bool check_for_intersection(vector<Self_Intersection>& self_intersections, vector<Intersection>& intersections);
+    void check_for_intersection();
+    bool check_for_single_intersection(int piece_ind);
     void fix_intersections();
     
     //variable-length thread_pieces
     void split_thread_piece(ThreadPiece* this_piece, ThreadPiece* this_piece_backup);
     void merge_thread_piece(ThreadPiece* this_piece, ThreadPiece* this_piece_backup);
     void adapt_links();
-    void refine_links();
+    void refine_links_geometrical();
+    void refine_links_mechanical();
     void unrefine_links();
-    bool needs_refine(ThreadPiece* piece);
+    bool needs_refine_geometrical(ThreadPiece* piece);
+    bool needs_refine_mechanical(ThreadPiece* piece);
     bool needs_unrefine(ThreadPiece* piece);
 
   //protected:
