@@ -686,7 +686,7 @@ void DrawStuff (void)
       thread->minimize_energy();
     }
 
-		thread->adapt_links();
+		//thread->adapt_links();
 
     //std::cout <<"ACTUAL END:\n" << thread->end_rot() << std::endl;
 
@@ -696,12 +696,71 @@ void DrawStuff (void)
 
   }
     updateThreadPoints();
-
+	
+	/*cout << "***********************************************" << endl;
+	thread->get_thread_data(points, twist_angles);
+	cout << "TWIST_ANGLES: ";
+	for (int i=0; i<twist_angles.size(); i++)
+		cout << twist_angles[i] << " ";
+	cout << endl;*/
+	
+	cout << "***********************************************" << endl;
+	thread->get_thread_data(points, twist_angles);
+	cout << "vertices.size(): " << points.size() << endl;
+	cout << "twist_angles: ";
+	for (int i=0; i<twist_angles.size(); i++)
+		cout << twist_angles[i] << " ";
+	cout << endl;
+	cout << "twist_angles differences: ";
+	for (int i=0; i<twist_angles.size()-1; i++)
+		cout << twist_angles[i+1] - twist_angles[i] << " ";
+	cout << endl;
+	double twist_cpy_p[points.size()+2];
+  for (int i=0; i < points.size(); i++)
+    twist_cpy_p[i+1] = -(360.0/(2.0*M_PI))*(twist_angles[i]+zero_angle);
+  twist_cpy_p[0] = twist_cpy_p[1]; //-(360.0/(2.0*M_PI))*(zero_angle);
+  twist_cpy_p[points.size()+1] = twist_cpy_p[points.size()]; //twist_cpy_p[points.size()]-(360.0/(2.0*M_PI))*zero_angle;
+	cout << "twist_cpy_p: ";
+	for (int i=0; i<points.size()+2; i++)
+		cout << twist_cpy_p[i] << " ";
+	cout << endl;
+	cout << "original twist_cpy_p[0]: " << -(360.0/(2.0*M_PI))*(zero_angle) << endl;
+		cout << "original twist_cpy_p[" << points.size()+1 << "]: " << twist_cpy_p[points.size()]-(360.0/(2.0*M_PI))*zero_angle << endl;
+	cout << "twist_cpy_p differences: ";
+	for (int i=0; i<points.size()+1; i++)
+		cout << twist_cpy_p[i+1]-twist_cpy_p[i] << " ";
+	cout << endl;	
+	
+	
 	//print stuff
 	if (print_mode_permanent || print_mode_instant) {
 		cout << "***********************************************" << endl;
-		thread->get_thread_data(points);
+		thread->get_thread_data(points, twist_angles);
 		cout << "vertices.size(): " << points.size() << endl;
+		cout << "twist_angles: ";
+		for (int i=0; i<twist_angles.size(); i++)
+			cout << twist_angles[i] << " ";
+		cout << endl;
+		cout << "twist_angles differences: ";
+		for (int i=0; i<twist_angles.size()-1; i++)
+			cout << twist_angles[i+1] - twist_angles[i] << " ";
+		cout << endl;
+		double twist_cpy[points.size()+2];
+	  for (int i=0; i < points.size(); i++)
+	    twist_cpy[i+1] = -(360.0/(2.0*M_PI))*(twist_angles[i]+zero_angle);
+	  twist_cpy[0] = twist_cpy[1]; //-(360.0/(2.0*M_PI))*(zero_angle);
+	  twist_cpy[points.size()+1] = twist_cpy[points.size()]; //twist_cpy[points.size()]-(360.0/(2.0*M_PI))*zero_angle;
+		cout << "twist_cpy: ";
+		for (int i=0; i<points.size()+2; i++)
+			cout << twist_cpy[i] << " ";
+		cout << endl;
+		cout << "original twist_cpy[0]: " << -(360.0/(2.0*M_PI))*(zero_angle) << endl;
+ 		cout << "original twist_cpy[" << points.size()+1 << "]: " << twist_cpy[points.size()]-(360.0/(2.0*M_PI))*zero_angle << endl;
+		cout << "twist_cpy differences: ";
+		for (int i=0; i<points.size()+1; i++)
+			cout << twist_cpy[i+1]-twist_cpy[i] << " ";
+		cout << endl;
+				
 		vector<double> lengths;
 		vector<double> edge_norms;
 		thread->get_thread_data(lengths, edge_norms);
@@ -842,7 +901,6 @@ void DrawStuff (void)
       twist_cpy);
 */
 
-
   double pts_cpy[points.size()+2][3];
   double twist_cpy[points.size()+2];
  /* pts_cpy[1][0] = 0.0;
@@ -862,7 +920,7 @@ void DrawStuff (void)
   pts_cpy[0][0] = pts_cpy[1][0]-rotations[0](0,0);
   pts_cpy[0][1] = pts_cpy[1][1]-rotations[0](1,0);
   pts_cpy[0][2] = pts_cpy[1][2]-rotations[0](2,0);
-  twist_cpy[0] = -(360.0/(2.0*M_PI))*(zero_angle);
+  twist_cpy[0] = twist_cpy[1]; //-(360.0/(2.0*M_PI))*(zero_angle);
 
 /* pts_cpy[points.size()][0] = (double)positions[1](0)-(double)zero_location(0);
  pts_cpy[points.size()][1] = (double)positions[1](1)-(double)zero_location(1);
@@ -873,7 +931,7 @@ void DrawStuff (void)
   pts_cpy[points.size()+1][0] = pts_cpy[points.size()][0]+rotations[1](0,0);
   pts_cpy[points.size()+1][1] = pts_cpy[points.size()][1]+rotations[1](1,0);
   pts_cpy[points.size()+1][2] = pts_cpy[points.size()][2]+rotations[1](2,0);
-  twist_cpy[points.size()+1] = twist_cpy[points.size()]-(360.0/(2.0*M_PI))*zero_angle;
+  twist_cpy[points.size()+1] = twist_cpy[points.size()]; //twist_cpy[points.size()]-(360.0/(2.0*M_PI))*zero_angle;
 
   gleTwistExtrusion(20,
       contour,
