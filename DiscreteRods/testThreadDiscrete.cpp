@@ -1139,7 +1139,7 @@ void initThread()
   std::cout << "energy: " << calculate_energy() << std::endl;
   */
 	
-  thread = new Thread(vertices, angles, lengths, rotations[0], rotations[1]);
+  thread = new Thread(vertices, angles, rotations[0], rotations[1]);
   updateThreadPoints();
 
 

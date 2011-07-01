@@ -92,7 +92,7 @@ double ThreadPiece::energy_twist()
 {
 #ifdef ISOTROPIC
  // std::cout << "SHOULD NOT BE CALLING THIS - very inefficient" << std::endl;
-  if (_prev_piece == NULL || _next_piece == NULL || _next_piece->_next_piece == NULL)
+  if (_prev_piece == NULL || _next_piece == NULL) //check || _next_piece->_next_piece == NULL)
   {
     return 0.0; //same - since the first twist is set to be zero (aligning bishop to initial material frame)
   } else {
@@ -168,7 +168,7 @@ double ThreadPiece::get_grav_coeff() {return GRAV_COEFF;}
 
 void ThreadPiece::gradient_twist(double& grad)
 {
-  grad = (_angle_twist - _next_piece->_angle_twist)/(2.0*(_rest_length + _next_piece->_rest_length));
+  grad = -(_next_piece->_angle_twist - _angle_twist)/(_rest_length + _next_piece->_rest_length);
 
   if (_prev_piece != NULL)
   {
@@ -197,7 +197,7 @@ void ThreadPiece::gradient_twist(double& grad)
 void ThreadPiece::gradient_vertex(Vector3d& grad)
 {
 #ifdef ISOTROPIC
-	double beta_angle_diff_over_L = TWIST_COEFF*(_my_thread->end_angle() - _my_thread->start_angle())/(_my_thread->total_length() - ((_my_thread->start_rest_length()+_my_thread->end_rest_length())/2));
+	double beta_angle_diff_over_L = TWIST_COEFF*(_my_thread->end_angle() - _my_thread->start_angle())/(_my_thread->total_length() - ((_my_thread->start_rest_length()+_my_thread->end_rest_length())/2.0));
 
 		Matrix3d skew_i;
 		Matrix3d skew_i_im1;
