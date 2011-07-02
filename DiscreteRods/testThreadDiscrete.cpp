@@ -686,7 +686,7 @@ void DrawStuff (void)
       thread->minimize_energy();
     }
 
-		//thread->adapt_links();
+		thread->adapt_links();
 
     //std::cout <<"ACTUAL END:\n" << thread->end_rot() << std::endl;
 
@@ -703,34 +703,6 @@ void DrawStuff (void)
 	for (int i=0; i<twist_angles.size(); i++)
 		cout << twist_angles[i] << " ";
 	cout << endl;*/
-	
-	cout << "***********************************************" << endl;
-	thread->get_thread_data(points, twist_angles);
-	cout << "vertices.size(): " << points.size() << endl;
-	cout << "twist_angles: ";
-	for (int i=0; i<twist_angles.size(); i++)
-		cout << twist_angles[i] << " ";
-	cout << endl;
-	cout << "twist_angles differences: ";
-	for (int i=0; i<twist_angles.size()-1; i++)
-		cout << twist_angles[i+1] - twist_angles[i] << " ";
-	cout << endl;
-	double twist_cpy_p[points.size()+2];
-  for (int i=0; i < points.size(); i++)
-    twist_cpy_p[i+1] = -(360.0/(2.0*M_PI))*(twist_angles[i]+zero_angle);
-  twist_cpy_p[0] = twist_cpy_p[1]; //-(360.0/(2.0*M_PI))*(zero_angle);
-  twist_cpy_p[points.size()+1] = twist_cpy_p[points.size()]; //twist_cpy_p[points.size()]-(360.0/(2.0*M_PI))*zero_angle;
-	cout << "twist_cpy_p: ";
-	for (int i=0; i<points.size()+2; i++)
-		cout << twist_cpy_p[i] << " ";
-	cout << endl;
-	cout << "original twist_cpy_p[0]: " << -(360.0/(2.0*M_PI))*(zero_angle) << endl;
-		cout << "original twist_cpy_p[" << points.size()+1 << "]: " << twist_cpy_p[points.size()]-(360.0/(2.0*M_PI))*zero_angle << endl;
-	cout << "twist_cpy_p differences: ";
-	for (int i=0; i<points.size()+1; i++)
-		cout << twist_cpy_p[i+1]-twist_cpy_p[i] << " ";
-	cout << endl;	
-	
 	
 	//print stuff
 	if (print_mode_permanent || print_mode_instant) {
@@ -760,6 +732,14 @@ void DrawStuff (void)
 		for (int i=0; i<points.size()+1; i++)
 			cout << twist_cpy[i+1]-twist_cpy[i] << " ";
 		cout << endl;
+		
+		double rest_length_so_far = 0.0;
+		cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl << "twist_angles should be: 0 ";
+		for (int i=0; i<twist_angles.size()-1; i++) {
+			rest_length_so_far += thread->rest_length_at_ind(i);
+			cout << thread->end_angle() * (rest_length_so_far/(thread->_total_length - thread->end_rest_length())) << " ";
+		}
+		cout << endl << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << endl;
 				
 		vector<double> lengths;
 		vector<double> edge_norms;

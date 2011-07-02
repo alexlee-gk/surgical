@@ -1012,6 +1012,90 @@ double Thread::intersection(const Vector3d& a_start_in, const Vector3d& a_end_in
 
 }
 
+//Based on http://softsurfer.com/Archive/algorithm_0106/algorithm_0106.htm
+double Thread::intersection_experimental(const Vector3d& a_start_in, const Vector3d& a_end_in, const double a_radius, 
+														const Vector3d& b_start_in, const Vector3d& b_end_in, const double b_radius)
+{
+	Vector3d u = a_end_in - a_start_in;
+	Vector3d v = b_end_in - b_start_in;
+	double total_radius = a_radius + b_radius;
+	Vector3d a_mid = (a_start_in + a_end_in)/2.0;
+  double edgeLen = max(u.norm() * INTERSECTION_EDGE_LENGTH_FACTOR,v.norm()*INTERSECTION_EDGE_LENGTH_FACTOR);
+  //check distance to b_start and b_end
+  double distb_start = (b_start_in-a_mid).norm();
+  double distb_end = (b_end_in - a_mid).norm();
+  if((distb_start > (edgeLen / 2.0 + total_radius)) && (distb_end > (edgeLen / 2.0 + total_radius))) {
+    return 0.0;
+  }
+  
+	// Line parametrization
+	// L1 : P(s) = a_start_in + s * (a_end_in - a_start_in) = a_start_in + s * u
+	// L2 : Q(t) = b_start_in + t * (b_end_in - b_start_in) = b_start_in + t * v
+	//Vector3d u = a_end_in - a_start_in;
+	//Vector3d v = b_end_in - b_start_in;
+	Vector3d w = a_start_in - b_start_in;
+	double a = u.dot(u);        // always >= 0
+	double b = u.dot(v);
+	double c = v.dot(v);        // always >= 0
+	double d = u.dot(w);
+	double e = v.dot(w);
+	double D = a*c-b*b;       	// always >= 0
+	double sc, sN, sD = D;      // sc = sN / sD, default sD = D >= 0
+	double tc, tN, tD = D;      // tc = tN / tD, default tD = D >= 0
+
+  // compute the line parameters of the two closest points
+  if (D < INTERSECTION_PARALLEL_CHECK_FACTOR) { 			// the lines are almost parallel
+    sN = 0.0;       				// force using point P0 on segment S1
+    sD = 1.0;       				// to prevent possible division by 0.0 later
+    tN = e;
+    tD = c;
+  } else {                	// get the closest points on the infinite lines
+    sN = (b*e - c*d);
+    tN = (a*e - b*d);
+    if (sN < 0.0) {       	// sc < 0 => the s=0 edge is visible
+      sN = 0.0;
+      tN = e;
+      tD = c;
+    } else if (sN > sD) { 	// sc > 1 => the s=1 edge is visible
+      sN = sD;
+      tN = e + b;
+      tD = c;
+    }
+  }
+
+  if (tN < 0.0) {           // tc < 0 => the t=0 edge is visible
+    tN = 0.0;
+    // recompute sc for this edge
+    if (-d < 0.0)
+      sN = 0.0;
+    else if (-d > a)
+      sN = sD;
+    else {
+		  sN = -d;
+		  sD = a;
+    }
+  } else if (tN > tD) {      // tc > 1 => the t=1 edge is visible
+    tN = tD;
+    // recompute sc for this edge
+    if ((-d + b) < 0.0)
+      sN = 0.0;
+    else if ((-d + b) > a)
+      sN = sD;
+    else {
+      sN = (-d + b);
+      sD = a;
+    }
+  }
+  // finally do the division to get sc and tc
+  sc = (abs(sN) < INTERSECTION_PARALLEL_CHECK_FACTOR ? 0.0 : sN / sD);
+  tc = (abs(tN) < INTERSECTION_PARALLEL_CHECK_FACTOR ? 0.0 : tN / tD);
+
+  // get the difference of the two closest points
+  double dist = (w + (sc * u) - (tc * v)).norm();  // = S1(sc) - S2(tc)
+
+  return max(0.0, a_radius + b_radius + 1.0 - dist);   // return the overlapping distance
+}
+
 /*********************************************************************************/
 //variable-length thread_pieces
 
@@ -1526,14 +1610,16 @@ double Thread::one_step_grad_change(double step_size)
 void Thread::minimize_energy_twist_angles()
 {
 #ifdef ISOTROPIC
-  double angle_per = (_thread_pieces[_thread_pieces.size()-2]->angle_twist())/((double)_thread_pieces.size()-2);
-
+  double accum_rest_length = rest_length_at_ind(0);
+  double angle_per_length = end_angle() / (_total_length - end_rest_length());
+  
   //#pragma omp parallel for num_threads(NUM_THREADS_PARALLEL_FOR)
   for (int piece_ind = 1; piece_ind < _thread_pieces.size()-2; piece_ind++)
-  {
-    _thread_pieces[piece_ind]->set_angle_twist(angle_per*piece_ind);
+ 	{
+ 		_thread_pieces[piece_ind]->set_angle_twist(angle_per_length*accum_rest_length);
     _thread_pieces[piece_ind]->updateFrames_twistOnly();
-  }
+ 		accum_rest_length += rest_length_at_ind(piece_ind);
+ 	}
 
 #else
   double step_in_grad_dir_twist = 1.0;
@@ -2562,6 +2648,11 @@ void Thread::get_thread_data(vector<Vector3d>& points, vector<double>& twist_ang
     points[piece_ind] = _thread_pieces[piece_ind]->vertex();
     twist_angles[piece_ind] = _thread_pieces[piece_ind]->angle_twist();
   }
+#ifdef ISOTROPIC
+  twist_angles.back() = twist_angles[twist_angles.size()-2] * (_total_length/(_total_length-end_rest_length()));
+#else
+	cout << "Internal error: Thread::get_thread_data() : wrong end twist angle for anisotropic case." << endl;
+#endif
 }
 
 void Thread::get_thread_data(vector<Vector3d>& points, vector<Matrix3d>& material_frames)
@@ -2586,6 +2677,11 @@ void Thread::get_thread_data(vector<Vector3d>& points, vector<double>& twist_ang
     twist_angles[piece_ind] = _thread_pieces[piece_ind]->angle_twist();
     material_frames[piece_ind] = _thread_pieces[piece_ind]->material_frame();
   }
+#ifdef ISOTROPIC
+  twist_angles.back() = twist_angles[twist_angles.size()-2] * (_total_length/(_total_length-end_rest_length()));
+#else
+	cout << "Internal error: Thread::get_thread_data() : wrong end twist angle for anisotropic case." << endl;
+#endif
 }
 
 void Thread::get_thread_data(vector<double>& lengths, vector<double>& edge_norms)

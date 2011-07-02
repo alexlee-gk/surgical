@@ -18,7 +18,6 @@ ThreadPiece::ThreadPiece() :
 	grad_offsets[1] = Vector3d(0.0, grad_eps, 0.0);
 	grad_offsets[2] = Vector3d(0.0, 0.0, grad_eps);
   _just_intersected = false;
-  cout << "ThreadPiece constructor 1 gets called" << endl;
 }
 
 	ThreadPiece::ThreadPiece(const Vector3d& vertex, const double angle_twist, const double rest_length, const int depth, ThreadPiece* prev, ThreadPiece* next, Thread* my_thread)
@@ -30,7 +29,6 @@ ThreadPiece::ThreadPiece() :
   set_prev(prev);
   set_next(next);
   _just_intersected = false;
-  cout << "ThreadPiece constructor 2 gets called" << endl;
 }
 
 
@@ -801,10 +799,10 @@ void ThreadPiece::splitPiece(ThreadPiece* new_piece)
 	if (_next_piece==NULL || _next_piece->_next_piece==NULL)
 		cout << "Internal error: ThreadPiece::splitPiece: this->_vertex cannot be the last or second to last vertex." << endl;
 	new_piece->_vertex = (_vertex + _next_piece->_vertex)/2.0;
-  new_piece->_angle_twist = _angle_twist;
-  //_edge, _edge_norm and _curvature_binormal are updated late
-	new_piece->_bishop_frame = _bishop_frame;
-	new_piece->_material_frame = _material_frame;
+  new_piece->_angle_twist = _angle_twist/2.0;
+  //_edge, _edge_norm and _curvature_binormal are updated later
+	//new_piece->_bishop_frame = _bishop_frame;
+	//new_piece->_material_frame = _material_frame;
 	new_piece->_rest_length = _rest_length = _rest_length/2.0;
 	new_piece->_depth = max(_depth, _next_piece->_depth)+1;
 	new_piece->_just_intersected = _just_intersected;
@@ -813,9 +811,13 @@ void ThreadPiece::splitPiece(ThreadPiece* new_piece)
 	fixPointersSplit(new_piece);
 	
 	update_edge();
-	new_piece->update_edge();
 	calculateBinormal();
+	//update_bishop_frame();
+	//update_material_frame();
+	new_piece->update_edge();
 	new_piece->calculateBinormal();
+	new_piece->update_bishop_frame();
+	new_piece->update_material_frame();
 }
 
 // Merges the edges adjacent to this->_vertex, i.e. merges this->_prev_piece with this and puts it into this.
@@ -830,8 +832,8 @@ void ThreadPiece::mergePiece()
 	_vertex = _prev_piece->_vertex;
   _angle_twist = _prev_piece->_angle_twist;
 	//_edge, _edge_norm and _curvature_binormal are updated later
-	intermediate_rotation(_bishop_frame, _prev_piece->_bishop_frame, _bishop_frame);
-	intermediate_rotation(_material_frame, _prev_piece->_material_frame, _material_frame);
+	//intermediate_rotation(_bishop_frame, _prev_piece->_bishop_frame, _bishop_frame);
+	//intermediate_rotation(_material_frame, _prev_piece->_material_frame, _material_frame);
 	_rest_length = _prev_piece->_rest_length + _rest_length;
 	_depth = _prev_piece->_depth;
 	_just_intersected = _prev_piece->_just_intersected;
@@ -841,6 +843,8 @@ void ThreadPiece::mergePiece()
 	
 	update_edge();
 	calculateBinormal();
+	update_bishop_frame();
+	update_material_frame();
 }
 
 void ThreadPiece::fixPointersSplit(ThreadPiece* new_piece)
