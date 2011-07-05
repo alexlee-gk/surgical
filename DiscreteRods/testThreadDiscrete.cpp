@@ -707,7 +707,19 @@ void DrawStuff (void)
 	//print stuff
 	if (print_mode_permanent || print_mode_instant) {
 		cout << "***********************************************" << endl;
-		thread->get_thread_data(points, twist_angles);
+		vector<ThreadPiece*> pcs = thread->_thread_pieces;
+		cout << "_thread_pieces[i] address: ";
+		for (int i=0; i<pcs.size(); i++) {
+			cout << pcs[i] << " ";
+		}
+		cout << endl;
+		cout << "_thread_pieces[i]->intersectionDist(): " << endl;
+		for (int i=0; i<pcs.size(); i++) {
+			cout << "--------------------" << endl;
+			cout << pcs[i]->intersectionDist() << " ";
+			cout << endl;
+		}
+		/*thread->get_thread_data(points, twist_angles);
 		cout << "vertices.size(): " << points.size() << endl;
 		cout << "twist_angles: ";
 		for (int i=0; i<twist_angles.size(); i++)
@@ -768,15 +780,15 @@ void DrawStuff (void)
 			total_edge_norm += edge_norms[i];
 		}
 		cout << "_total_length: " << thread->_total_length << "\t" << "total_rest_length: " << total_rest_length << "\t" << "total_edge_norm: " << total_edge_norm << endl;
-		
+		*/
 		/*cout << "calculate_energy(): " << thread->calculate_energy() << endl;
 		cout << "calculate_energy_inefficient(): " << thread->calculate_energy_inefficient() << endl;*/
-		vector<double> curvature_binormal_norm;
+		/*vector<double> curvature_binormal_norm;
 		thread->getCurvatureBinormalNorm(curvature_binormal_norm);
 		cout << "curvature_binormal_norm: ";
 		for(int i=0; i<curvature_binormal_norm.size(); i++)
 			cout << curvature_binormal_norm[i] << " ";
-		cout << endl;
+		cout << endl;*/
 		
 		print_mode_instant = false;
 	}
@@ -1024,7 +1036,7 @@ void initThread()
 
   vertices.push_back(Vector3d::Zero());
   angles.push_back(0.0);
-  lengths.push_back(end_length);
+  lengths.push_back(end_length/4.0);
   //push back unitx so first tangent matches start_frame
   vertices.push_back(Vector3d::UnitX()*lengths.back());
   angles.push_back(0.0);
@@ -1078,12 +1090,12 @@ void initThread()
 	
 	vertices.push_back(vertices.back()+Vector3d::UnitX()*lengths.back());
   angles.push_back(0.0);
-	lengths.push_back(end_length);
+	lengths.push_back(end_length/4.0);
 	
   //push back unitx so last tangent matches end_frame
   vertices.push_back(vertices.back()+Vector3d::UnitX()*lengths.back());
   angles.push_back(0.0);
-	lengths.push_back(end_length);
+	lengths.push_back(end_length/4.0);
 	
   //angles.resize(vertices.size());
 
@@ -1119,7 +1131,7 @@ void initThread()
   std::cout << "energy: " << calculate_energy() << std::endl;
   */
 	
-  thread = new Thread(vertices, angles, rotations[0], rotations[1]);
+  thread = new Thread(vertices, angles, lengths, rotations[0], rotations[1]);
   updateThreadPoints();
 
 

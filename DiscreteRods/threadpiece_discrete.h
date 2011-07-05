@@ -3,10 +3,8 @@
 
 #include "threadutils_discrete.h"
 #include <math.h>
-#include <time.h>
 
-
-
+#define MAX_SQUARED_DOUBLE_DIST_BEFORE_UNREFINE 35.0
 
 using namespace std;
 USING_PART_OF_NAMESPACE_EIGEN
@@ -96,17 +94,16 @@ class ThreadPiece
 		//double calculate_holonomy();
 
     //variable-length thread_pieces
-    int _depth;
-    time_t _inter_time;
-    bool _just_intersected;
+    int _depth;    
+    vector<ThreadPiece*> _recent_intersections;
     void splitPiece(ThreadPiece* new_piece);
     void mergePiece();
     void fixPointersSplit(ThreadPiece* new_piece);
 		void fixPointersMerge();
-		void intersectionUpdate();
-		double timeSinceIntersection();
-		bool justIntersected();
-		void resetJustIntersected();
+		void addIntersection(ThreadPiece* piece);
+		double intersectionDist();
+		void intersectionPrint();
+		double _intersection_dist;
 
 		void copyData(const ThreadPiece& rhs);
     void set_my_thread(Thread* my_thread){_my_thread = my_thread;};

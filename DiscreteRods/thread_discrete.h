@@ -41,8 +41,7 @@
 
 #define REFINE_THRESHHOLD 0.6
 #define UNREFINE_THRESHHOLD 0.2 /*must be smaller than REFINE_THRESHHOLD otherwise thread will be unstable */
-#define MAX_REFINEMENT_DEPTH 3
-#define TIME_BEFORE_UNREFINE 2.0
+#define MAX_REFINEMENT_DEPTH 2
 
 #define INTERSECTION_PUSHBACK_EPS 0.03 
 //#define NUM_THREADS_PARALLEL_FOR 2

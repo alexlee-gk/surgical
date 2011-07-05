@@ -17,7 +17,6 @@ ThreadPiece::ThreadPiece() :
 	grad_offsets[0] = Vector3d(grad_eps, 0.0, 0.0);
 	grad_offsets[1] = Vector3d(0.0, grad_eps, 0.0);
 	grad_offsets[2] = Vector3d(0.0, 0.0, grad_eps);
-  _just_intersected = false;
 }
 
 	ThreadPiece::ThreadPiece(const Vector3d& vertex, const double angle_twist, const double rest_length, const int depth, ThreadPiece* prev, ThreadPiece* next, Thread* my_thread)
@@ -28,12 +27,11 @@ ThreadPiece::ThreadPiece() :
 	grad_offsets[2] = Vector3d(0.0, 0.0, grad_eps);
   set_prev(prev);
   set_next(next);
-  _just_intersected = false;
 }
 
 
 	ThreadPiece::ThreadPiece(const ThreadPiece& rhs)
-: _vertex(rhs._vertex), _angle_twist(rhs._angle_twist), _rest_length(rhs._rest_length), _depth(rhs._depth), _just_intersected(rhs._just_intersected), _edge(rhs._edge), _edge_norm(rhs._edge_norm), _curvature_binormal(rhs._curvature_binormal), _bishop_frame(rhs._bishop_frame), _material_frame(rhs._material_frame), _prev_piece(rhs._prev_piece), _next_piece(rhs._next_piece), _my_thread(rhs._my_thread)
+: _vertex(rhs._vertex), _angle_twist(rhs._angle_twist), _rest_length(rhs._rest_length), _depth(rhs._depth), _recent_intersections(rhs._recent_intersections), _edge(rhs._edge), _edge_norm(rhs._edge_norm), _curvature_binormal(rhs._curvature_binormal), _bishop_frame(rhs._bishop_frame), _material_frame(rhs._material_frame), _prev_piece(rhs._prev_piece), _next_piece(rhs._next_piece), _my_thread(rhs._my_thread)
 {
 	grad_offsets[0] = Vector3d(grad_eps, 0.0, 0.0);
 	grad_offsets[1] = Vector3d(0.0, grad_eps, 0.0);
@@ -42,7 +40,7 @@ ThreadPiece::ThreadPiece() :
 }
 	
   ThreadPiece::ThreadPiece(const ThreadPiece& rhs, Thread* my_thread)
-: _vertex(rhs._vertex), _angle_twist(rhs._angle_twist), _rest_length(rhs._rest_length), _depth(rhs._depth), _just_intersected(rhs._just_intersected), _edge(rhs._edge), _edge_norm(rhs._edge_norm), _curvature_binormal(rhs._curvature_binormal), _bishop_frame(rhs._bishop_frame), _material_frame(rhs._material_frame), _prev_piece(rhs._prev_piece), _next_piece(rhs._next_piece), _my_thread(my_thread)
+: _vertex(rhs._vertex), _angle_twist(rhs._angle_twist), _rest_length(rhs._rest_length), _depth(rhs._depth), _recent_intersections(rhs._recent_intersections), _edge(rhs._edge), _edge_norm(rhs._edge_norm), _curvature_binormal(rhs._curvature_binormal), _bishop_frame(rhs._bishop_frame), _material_frame(rhs._material_frame), _prev_piece(rhs._prev_piece), _next_piece(rhs._next_piece), _my_thread(my_thread)
 {
 	grad_offsets[0] = Vector3d(grad_eps, 0.0, 0.0);
 	grad_offsets[1] = Vector3d(0.0, grad_eps, 0.0);
@@ -805,8 +803,7 @@ void ThreadPiece::splitPiece(ThreadPiece* new_piece)
 	//new_piece->_material_frame = _material_frame;
 	new_piece->_rest_length = _rest_length = _rest_length/2.0;
 	new_piece->_depth = max(_depth, _next_piece->_depth)+1;
-	new_piece->_just_intersected = _just_intersected;
-	new_piece->_inter_time = _inter_time;
+	new_piece->_recent_intersections = _recent_intersections;
 	
 	fixPointersSplit(new_piece);
 	
@@ -836,8 +833,12 @@ void ThreadPiece::mergePiece()
 	//intermediate_rotation(_material_frame, _prev_piece->_material_frame, _material_frame);
 	_rest_length = _prev_piece->_rest_length + _rest_length;
 	_depth = _prev_piece->_depth;
-	_just_intersected = _prev_piece->_just_intersected;
-	_inter_time = _prev_piece->_inter_time;
+	for (int i=0; i<_recent_intersections.size(); i++) {
+		int j;
+		for (j=0; j<_prev_piece->_recent_intersections.size() && _prev_piece->_recent_intersections[j]!=_recent_intersections[i]; j++) {}
+		if (j==_prev_piece->_recent_intersections.size())
+			_recent_intersections.push_back(_prev_piece->_recent_intersections[j]);
+	}
 	
 	fixPointersMerge();
 	
@@ -862,23 +863,35 @@ void ThreadPiece::fixPointersMerge()
 	this->_prev_piece = _prev_piece->_prev_piece;
 }
 
-void ThreadPiece::intersectionUpdate() {
-	_just_intersected = true;
-	time(&_inter_time);
+void ThreadPiece::addIntersection(ThreadPiece* piece) {
+	int piece_ind;
+	for (piece_ind=0; piece_ind<_recent_intersections.size(); piece_ind++) {
+		if (_recent_intersections[piece_ind] == piece) {
+			break;
+		}
+	}
+	if (piece_ind == _recent_intersections.size())
+		_recent_intersections.push_back(piece);
 }
 
-bool ThreadPiece::justIntersected() {
-	return _just_intersected;
-}
-
-void ThreadPiece::resetJustIntersected() {
-	_just_intersected = false;
-}
-
-double ThreadPiece::timeSinceIntersection() {
-	time_t curr_time;
-	time(&curr_time);
-	return difftime (curr_time,_inter_time);
+double ThreadPiece::intersectionDist() {
+  double min_dist_squared = MAX_SQUARED_DOUBLE_DIST_BEFORE_UNREFINE;
+  for (int piece_ind=_recent_intersections.size()-1; piece_ind>-1; piece_ind--) {
+  	if (_recent_intersections[piece_ind] == NULL) {
+  		cout << "Internal error: intersectionDist(): _recent_intersections[piece_ind] is NULL" << endl;
+  		_recent_intersections.erase(_recent_intersections.begin() + piece_ind);
+  		continue;
+  	}
+  	if ((_recent_intersections[piece_ind]->_next_piece == NULL) || (_next_piece==NULL))
+  		cout << "Internal error: intersectionDist(): _recent_intersections[piece_ind]->_next_piece or _next_piece is NULL" << endl;
+  	double midpoint_dist_squared = ((_recent_intersections[piece_ind]->_vertex + _recent_intersections[piece_ind]->_next_piece->_vertex) - (_vertex + _next_piece->_vertex)).squaredNorm();
+	  if (midpoint_dist_squared < MAX_SQUARED_DOUBLE_DIST_BEFORE_UNREFINE) {
+	  	min_dist_squared = min(min_dist_squared, midpoint_dist_squared);
+	  } else {
+	  	_recent_intersections.erase(_recent_intersections.begin() + piece_ind);
+	  }
+  }
+	return min_dist_squared;
 }
 
 ThreadPiece& ThreadPiece::operator=(const ThreadPiece& rhs)
@@ -892,7 +905,7 @@ ThreadPiece& ThreadPiece::operator=(const ThreadPiece& rhs)
 	_material_frame = rhs._material_frame;
 	_rest_length = rhs._rest_length;
 	_depth = rhs._depth;
-	_just_intersected = rhs._just_intersected;
+	_recent_intersections = rhs._recent_intersections;
 
   _prev_piece = rhs._prev_piece;
   _next_piece = rhs._next_piece;
@@ -915,6 +928,6 @@ void ThreadPiece::copyData(const ThreadPiece& rhs)
 	_material_frame = rhs._material_frame;
   _rest_length = rhs._rest_length;
   _depth = rhs._depth;
-	_just_intersected = rhs._just_intersected;
+  _recent_intersections = rhs._recent_intersections;
 
 }
