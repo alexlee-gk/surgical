@@ -283,8 +283,6 @@ class Thread
 		double intersection_experimental(const Vector3d& a_start_in, const Vector3d& a_end_in, const double a_radius, const Vector3d& b_start_in, const Vector3d& b_end_in, const double b_radius);
 
     bool check_for_intersection(vector<Self_Intersection>& self_intersections, vector<Intersection>& intersections);
-    void check_for_intersection();
-    bool check_for_single_intersection(int piece_ind);
     void fix_intersections();
     
     //variable-length thread_pieces

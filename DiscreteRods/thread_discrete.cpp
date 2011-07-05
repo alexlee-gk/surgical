@@ -800,71 +800,6 @@ bool Thread::check_for_intersection(vector<Self_Intersection>& self_intersection
   return found;
 }
 
-/*void Thread::check_for_intersection()
-{
-  //self intersections
-  for(int i = 0; i < _thread_pieces.size() - 3; i++) {
-    //+2 so you don't check the adjacent piece - bug?
-    for(int j = i + 2; j < _thread_pieces.size() - 2; j++) {
-      if(i == 0 && j == _thread_pieces.size() - 2) 
-        continue;
-      double intersection_dist = self_intersection(i,j,THREAD_RADIUS);
-      if (intersection_dist!=0) {
-				_thread_pieces[i]->intersectionUpdate();
-				_thread_pieces[j]->intersectionUpdate();
-				cout << "||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||" << endl;
-			} else {
-				_thread_pieces[i]->resetJustIntersected();
-				_thread_pieces[j]->resetJustIntersected();
-			}
-    }
-  }
-
-  //intersections with objects
-  for (int i=0; i < objects_in_env.size(); i++) {
-    for(int j = 2; j < _thread_pieces.size() - 3; j++) {
-      double intersection_dist = obj_intersection(j,THREAD_RADIUS, i, objects_in_env[i]._radius);
-      if (intersection_dist!=0) {
-				_thread_pieces[j]->intersectionUpdate();
-			} else {
-				_thread_pieces[j]->resetJustIntersected();
-			}
-    }
-  }
-}*/
-
-/*// _thread_pieces[piece_ind] should not be the first or last link of the thread
-bool Thread::check_for_single_intersection(int piece_ind)
-{
-  if (piece_ind <= 0 || piece_ind >= _thread_pieces.size() - 2)
-  	cout << "Internal error: Thread::check_for_single_intersection(): " << piece_ind << " is an invalid piece index." <<endl;
-  
-  //self intersections
-  for(int j = piece_ind - 2; j >= 0; j--) {
-  	double intersection_dist = self_intersection(j,piece_ind,THREAD_RADIUS);
-  	if(intersection_dist != 0) {
-      //cout << "should be true" << endl;
-      return true;
-      //cout << "this should not be printed" << endl;
-    }
-  }
-  for(int j = piece_ind + 2; j < _thread_pieces.size()-1; j++) {
-  	double intersection_dist = self_intersection(piece_ind,j,THREAD_RADIUS);
-    if(intersection_dist != 0) {
-      //cout << "should be true" << endl;
-      return true;
-      //cout << "this should not be printed" << endl;
-    }
-  }
-
-  //intersections with objects
-  for (int j=0; j < objects_in_env.size(); j++)
-    if(obj_intersection(piece_ind, THREAD_RADIUS, j, objects_in_env[j]._radius) != 0)
-      return true;
-
-  return false;
-}*/
-
 //define an epsilon
 double Thread::self_intersection(int i, int j, double radius)
 {
@@ -1126,14 +1061,7 @@ void Thread::merge_thread_piece(ThreadPiece* this_piece, ThreadPiece* this_piece
 		for (int j=_thread_pieces[i]->_recent_intersections.size()-1; j>-1; j--) {
 			if (_thread_pieces[i]->_recent_intersections[j] == _thread_pieces[piece_ind-1])
 				_thread_pieces[i]->_recent_intersections.erase(_thread_pieces[i]->_recent_intersections.begin() + j);
-		}		
-		/*for ( vector<ThreadPiece*>::iterator it=_thread_pieces[i]->_recent_intersections.begin(); it!=_thread_pieces[i]->_recent_intersections.end(); ) {
-			if ((*it) == _thread_pieces[piece_ind-1]) {
-				it = _thread_pieces[i]->_recent_intersections.erase(it);
-			} else {
-			 	++it;
-			}
-		}*/
+		}
 	}
 		
 	delete _thread_pieces[piece_ind-1];
@@ -1147,7 +1075,8 @@ void Thread::merge_thread_piece(ThreadPiece* this_piece, ThreadPiece* this_piece
 void Thread::adapt_links()
 {
 	unrefine_links();
-	refine_links_mechanical();
+	if (COLLISION_CHECKING)
+		refine_links_mechanical();
 	refine_links_geometrical();
 }
 
@@ -1422,11 +1351,6 @@ bool Thread::needs_refine_geometrical(ThreadPiece* piece)
 
 bool Thread::needs_refine_mechanical(ThreadPiece* piece)
 {
-	/*cout << "_thread_pieces[i] address: ";
-  for (int piece_ind=0; piece_ind<_thread_pieces.size(); piece_ind++) {
-  	cout <<_thread_pieces[piece_ind] << " ";
-  }
-  cout << endl;*/
 	if (piece==NULL)
 		cout << "piece in needs_refine_mechanical is NULL" << endl;
 	return (piece->intersectionDist() < MAX_SQUARED_DOUBLE_DIST_BEFORE_UNREFINE);
@@ -1435,10 +1359,6 @@ bool Thread::needs_refine_mechanical(ThreadPiece* piece)
 // Does the vertex especified by piece->_vertex need to be unrefined?
 bool Thread::needs_unrefine(ThreadPiece* piece)
 {
-	/*cout << "_thread_pieces[i] address: ";
-  for (int piece_ind=0; piece_ind<_thread_pieces.size(); piece_ind++) {
-  	cout <<_thread_pieces[piece_ind] << " ";
-  }*/
 	if (piece==NULL)
 		cout << "piece in needs_refine_mechanical is NULL" << endl;
 	return ((piece->curvature_binormal_norm() < UNREFINE_THRESHHOLD) && 
