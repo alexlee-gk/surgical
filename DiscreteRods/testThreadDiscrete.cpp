@@ -309,6 +309,22 @@ void processNormalKeys(unsigned char key, int x, int y)
   	only_hor_spin = !only_hor_spin;
   } else if(key == 'v' || key == 'V') {
   	only_ver_spin = !only_ver_spin;
+  /*} else if(key == ',') {
+  	cout << "Enter the vertex index you want to split." << endl;
+  	for(int i=0; i<1000; i++) {}
+  	int piece_ind;
+  	cin >> piece_ind;
+  	thread->split_thread_piece(thread->_thread_pieces[piece_ind], thread->_thread_pieces_backup[piece_ind]);
+		thread->minimize_energy();
+  	glutPostRedisplay ();
+  } else if(key == '.') {
+  	cout << "Enter the vertex index you want to merge." << endl;
+  	for(int i=0; i<1000; i++) {}
+  	int piece_ind;
+  	cin >> piece_ind;
+  	thread->merge_thread_piece(thread->_thread_pieces[piece_ind], thread->_thread_pieces_backup[piece_ind]);
+		thread->minimize_energy();
+  	glutPostRedisplay ();*/
   } else if (key == 'w') {
     rotate_frame[0] = 0.0;
     rotate_frame[1] = -111.0;
@@ -1019,7 +1035,7 @@ void updateThreadPoints()
 
 void initThread()
 {
-  int numInit = 3;//(3*3)/DEFAULT_REST_LENGTH;
+  int numInit = 4;//(3*3)/DEFAULT_REST_LENGTH;
   double noise_factor = 0.0;
 
 	double end_length = DEFAULT_REST_LENGTH;
@@ -1159,7 +1175,7 @@ void initThread()
 
 void initThread_closedPolygon()
 {
-  int numVertices = 20;
+  int numVertices = 15;
   double angle_between = M_PI - (((double)(numVertices-2))*(M_PI))/((double)numVertices);
   //note that edge length is equal to rest_length
 
