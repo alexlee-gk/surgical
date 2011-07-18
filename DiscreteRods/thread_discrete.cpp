@@ -14,7 +14,7 @@ Thread::Thread(const VectorXd& vertices, const VectorXd& twists, const Matrix3d&
   _angle_twist_backup.resize(twists.size());
   for (int i=0; i < twists.size(); i++)
   {
-    _thread_pieces[i] = new ThreadPiece(vertices.segment<3>(3*i), twists(i), DEFAULT_REST_LENGTH, this);
+    _thread_pieces[i] = new ThreadPiece(vertices.segment<3>(3*i), twists(i), DEFAULT_REST_LENGTH, 0, this);
   }
 
   for (int i=1; i < twists.size(); i++)
@@ -37,7 +37,7 @@ Thread::Thread(const VectorXd& vertices, const VectorXd& twists, const Matrix3d&
   //setup backups
   for (int i=0; i < twists.size(); i++)
   {
-  	_thread_pieces_backup[i] = new ThreadPiece(vertices.segment<3>(3*i), twists(i), DEFAULT_REST_LENGTH, this);
+  	_thread_pieces_backup[i] = new ThreadPiece(vertices.segment<3>(3*i), twists(i), DEFAULT_REST_LENGTH, 0, this);
   }
 
   for (int i=1; i < twists.size(); i++)
@@ -73,7 +73,7 @@ Thread::Thread(vector<Vector3d>& vertices, vector<double>& twist_angles, Matrix3
   _angle_twist_backup.resize(vertices.size());
   for (int i=0; i < vertices.size(); i++)
   {
-    _thread_pieces[i] = new ThreadPiece(vertices[i], twist_angles[i], DEFAULT_REST_LENGTH, this);
+    _thread_pieces[i] = new ThreadPiece(vertices[i], twist_angles[i], DEFAULT_REST_LENGTH, 0, this);
 //    _thread_pieces.push_back(ThreadPiece(vertices[i], twist_angles[i]));
   }
 
@@ -97,7 +97,7 @@ Thread::Thread(vector<Vector3d>& vertices, vector<double>& twist_angles, Matrix3
 	//setup backups
   for (int i=0; i < vertices.size(); i++)
   {
-    _thread_pieces_backup[i] = new ThreadPiece(vertices[i], twist_angles[i], DEFAULT_REST_LENGTH, this);
+    _thread_pieces_backup[i] = new ThreadPiece(vertices[i], twist_angles[i], DEFAULT_REST_LENGTH, 0, this);
   }
 
   for (int i=1; i < vertices.size(); i++)
@@ -139,7 +139,7 @@ Thread::Thread(vector<Vector3d>& vertices, vector<double>& twist_angles, Matrix3
   _angle_twist_backup.resize(vertices.size());
   for (int i=0; i < vertices.size(); i++)
   {
-    _thread_pieces[i] = new ThreadPiece(vertices[i], twist_angles[i], rest_length, this);
+    _thread_pieces[i] = new ThreadPiece(vertices[i], twist_angles[i], rest_length, 0, this);
 //    _thread_pieces.push_back(ThreadPiece(vertices[i], twist_angles[i]));
   }
 
@@ -163,7 +163,7 @@ Thread::Thread(vector<Vector3d>& vertices, vector<double>& twist_angles, Matrix3
 	//setup backups
   for (int i=0; i < vertices.size(); i++)
   {
-    _thread_pieces_backup[i] = new ThreadPiece(vertices[i], twist_angles[i], rest_length, this);
+    _thread_pieces_backup[i] = new ThreadPiece(vertices[i], twist_angles[i], rest_length, 0, this);
   }
 
   for (int i=1; i < vertices.size(); i++)
@@ -197,14 +197,14 @@ Thread::Thread(vector<Vector3d>& vertices, vector<double>& twist_angles, Matrix3
 
 
 //As above, with a specific rest length for each threadpiece.
-Thread::Thread(vector<Vector3d>& vertices, vector<double>& twist_angles, vector<double>& rest_lengths, Matrix3d& start_rot)
+Thread::Thread(vector<Vector3d>& vertices, vector<double>& twist_angles, vector<double>& rest_lengths, vector<int>& depths, Matrix3d& start_rot)
 {
   _thread_pieces.resize(vertices.size());
   _thread_pieces_backup.resize(vertices.size());
   _angle_twist_backup.resize(vertices.size());
   for (int i=0; i < vertices.size(); i++)
   {
-    _thread_pieces[i] = new ThreadPiece(vertices[i], twist_angles[i], rest_lengths[i], this);
+    _thread_pieces[i] = new ThreadPiece(vertices[i], twist_angles[i], rest_lengths[i], depths[i], this);
 //    _thread_pieces.push_back(ThreadPiece(vertices[i], twist_angles[i]));
   }
 	
@@ -228,7 +228,7 @@ Thread::Thread(vector<Vector3d>& vertices, vector<double>& twist_angles, vector<
 	//setup backups
   for (int i=0; i < vertices.size(); i++)
   {
-    _thread_pieces_backup[i] = new ThreadPiece(vertices[i], twist_angles[i], rest_lengths[i], this);
+    _thread_pieces_backup[i] = new ThreadPiece(vertices[i], twist_angles[i], rest_lengths[i], depths[i], this);
   }
 
   for (int i=1; i < vertices.size(); i++)
@@ -269,7 +269,7 @@ Thread::Thread(vector<Vector3d>& vertices, vector<double>& twist_angles, Matrix3
   _thread_pieces.resize(vertices.size());
   for (int i=0; i < vertices.size(); i++)
   {
-    _thread_pieces[i] = new ThreadPiece(vertices[i], twist_angles[i], DEFAULT_REST_LENGTH, this);
+    _thread_pieces[i] = new ThreadPiece(vertices[i], twist_angles[i], DEFAULT_REST_LENGTH, 0, this);
   }
 
   for (int i=1; i < vertices.size(); i++)
@@ -292,7 +292,7 @@ Thread::Thread(vector<Vector3d>& vertices, vector<double>& twist_angles, Matrix3
 	//setup backups
   for (int i=0; i < vertices.size(); i++)
   {
-    _thread_pieces_backup[i] = new ThreadPiece(vertices[i], twist_angles[i], DEFAULT_REST_LENGTH, this);
+    _thread_pieces_backup[i] = new ThreadPiece(vertices[i], twist_angles[i], DEFAULT_REST_LENGTH, 0, this);
     //_thread_pieces.push_back(ThreadPiece(vertices[i], twist_angles[i]));
   }
 
@@ -401,7 +401,7 @@ Thread::Thread(vector<Vector3d>& vertices, vector<double>& twist_angles, vector<
   _thread_pieces.resize(vertices.size());
   for (int i=0; i < vertices.size(); i++)
   {
-    _thread_pieces[i] = new ThreadPiece(vertices[i], twist_angles[i], rest_lengths[i], this);
+    _thread_pieces[i] = new ThreadPiece(vertices[i], twist_angles[i], rest_lengths[i], 0, this);
   }
 
   for (int i=1; i < vertices.size(); i++)
@@ -424,7 +424,7 @@ Thread::Thread(vector<Vector3d>& vertices, vector<double>& twist_angles, vector<
 	//setup backups
   for (int i=0; i < vertices.size(); i++)
   {
-    _thread_pieces_backup[i] = new ThreadPiece(vertices[i], twist_angles[i], rest_lengths[i], this);
+    _thread_pieces_backup[i] = new ThreadPiece(vertices[i], twist_angles[i], rest_lengths[i], 0, this);
   }
 
   for (int i=1; i < vertices.size(); i++)
@@ -2657,6 +2657,44 @@ void Thread::get_thread_data(vector<Vector3d>& points, vector<double>& twist_ang
   {
     points[piece_ind] = _thread_pieces[piece_ind]->vertex();
     twist_angles[piece_ind] = _thread_pieces[piece_ind]->angle_twist();
+  }
+#ifdef ISOTROPIC
+  twist_angles.back() = twist_angles[twist_angles.size()-2] * (_total_length/(_total_length-end_rest_length()));
+#else
+	cout << "Internal error: Thread::get_thread_data() : wrong end twist angle for anisotropic case." << endl;
+#endif
+}
+
+void Thread::get_thread_data(vector<Vector3d>& points, vector<double>& twist_angles, vector<double>& rest_lengths)
+{
+  points.resize(_thread_pieces.size());
+  twist_angles.resize(_thread_pieces.size());
+  rest_lengths.resize(_thread_pieces.size());
+  for (int piece_ind=0; piece_ind < _thread_pieces.size(); piece_ind++)
+  {
+    points[piece_ind] = _thread_pieces[piece_ind]->vertex();
+    twist_angles[piece_ind] = _thread_pieces[piece_ind]->angle_twist();
+    rest_lengths[piece_ind] = _thread_pieces[piece_ind]->rest_length();
+  }
+#ifdef ISOTROPIC
+  twist_angles.back() = twist_angles[twist_angles.size()-2] * (_total_length/(_total_length-end_rest_length()));
+#else
+	cout << "Internal error: Thread::get_thread_data() : wrong end twist angle for anisotropic case." << endl;
+#endif
+}
+
+void Thread:: get_thread_data(vector<Vector3d>& points, vector<double>& twist_angles, vector<double>& rest_lengths, vector<int>& depths)
+{
+  points.resize(_thread_pieces.size());
+  twist_angles.resize(_thread_pieces.size());
+  rest_lengths.resize(_thread_pieces.size());
+  depths.resize(_thread_pieces.size());
+  for (int piece_ind=0; piece_ind < _thread_pieces.size(); piece_ind++)
+  {
+    points[piece_ind] = _thread_pieces[piece_ind]->vertex();
+    twist_angles[piece_ind] = _thread_pieces[piece_ind]->angle_twist();
+    rest_lengths[piece_ind] = _thread_pieces[piece_ind]->rest_length();
+    depths[piece_ind] = _thread_pieces[piece_ind]->depth();
   }
 #ifdef ISOTROPIC
   twist_angles.back() = twist_angles[twist_angles.size()-2] * (_total_length/(_total_length-end_rest_length()));

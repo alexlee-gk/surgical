@@ -38,6 +38,8 @@ int Trajectory_Reader::read_threads_from_file()
   twist_angles.resize(num_pts_each);
   vector<double> rest_lengths;
   rest_lengths.resize(num_pts_each);
+  vector<int> depths;
+  depths.resize(num_pts_each);
   Matrix3d start_rot;
   Matrix3d end_rot;
 
@@ -64,11 +66,11 @@ int Trajectory_Reader::read_threads_from_file()
 
     for (int i=0; i < points.size(); i++)
     {
-      threads_playback >> points[i](0) >> points[i](1) >> points[i](2) >> twist_angles[i] >> rest_lengths[i];
+      threads_playback >> points[i](0) >> points[i](1) >> points[i](2) >> twist_angles[i] >> rest_lengths[i] >> depths[i];
     }
 		//twist_angles.back() = twist_angles[twist_angles.size()-2];
 
-    Thread nextThread(points, twist_angles, rest_lengths, start_rot);
+    Thread nextThread(points, twist_angles, rest_lengths, depths, start_rot);
     _each_thread.push_back(nextThread);
 		//_each_thread.back() = nextThread;
 

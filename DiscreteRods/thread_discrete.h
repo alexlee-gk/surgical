@@ -111,7 +111,7 @@ class Thread
     Thread(vector<Vector3d>& vertices, vector<double>& twist_angles, vector<double>& rest_lengths, Matrix3d& start_rot, Matrix3d& end_rot);
     Thread(vector<Vector3d>& vertices, vector<double>& twist_angles, Matrix3d& start_rot);
     Thread(vector<Vector3d>& vertices, vector<double>& twist_angles, Matrix3d& start_rot, const double rest_length);
-    Thread(vector<Vector3d>& vertices, vector<double>& twist_angles, vector<double>& rest_lengths, Matrix3d& start_rot);
+    Thread(vector<Vector3d>& vertices, vector<double>& twist_angles, vector<double>& rest_lengths, vector<int>& depths, Matrix3d& start_rot);
     Thread(const Thread& rhs);
     virtual ~Thread();
 
@@ -119,6 +119,7 @@ class Thread
     void get_thread_data(vector<Vector3d>& points);
     void get_thread_data(vector<Vector3d>& points, vector<double>& twist_angles);
     void get_thread_data(vector<Vector3d>& points, vector<double>& twist_angles, vector<double>& rest_lengths);
+    void get_thread_data(vector<Vector3d>& points, vector<double>& twist_angles, vector<double>& rest_lengths, vector<int>& depths);
     void get_thread_data(vector<Vector3d>& points, vector<Matrix3d>& material_frames);
     void get_thread_data(vector<Vector3d>& points, vector<double>& twist_angles, vector<Matrix3d>& material_frames);
     void get_thread_data(vector<double>& lengths, vector<double>& edge_norms);

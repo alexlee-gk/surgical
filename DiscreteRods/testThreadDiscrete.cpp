@@ -252,25 +252,25 @@ void processNormalKeys(unsigned char key, int x, int y)
   	Trajectory_Reader traj_reader;
   	char *fullPath = new char[256];
   	if (key == '1')
-	    sprintf(fullPath, "%s%s", "saved_threads/", "demo1");
+	    sprintf(fullPath, "%s%s", "saved_threads/", "vlh_demo1");
 	  else if (key == '2')
-	  	sprintf(fullPath, "%s%s", "saved_threads/", "demo2");
+	  	sprintf(fullPath, "%s%s", "saved_threads/", "vlh_demo2");
 	  else if (key == '3')
-	  	sprintf(fullPath, "%s%s", "saved_threads/", "demo3");
+	  	sprintf(fullPath, "%s%s", "saved_threads/", "vlh_demo3");
 	  else if (key == '4')
-	  	sprintf(fullPath, "%s%s", "saved_threads/", "demo4");
+	  	sprintf(fullPath, "%s%s", "saved_threads/", "vlh_demo4");
 	  else if (key == '5')
-	  	sprintf(fullPath, "%s%s", "saved_threads/", "demo5");
+	  	sprintf(fullPath, "%s%s", "saved_threads/", "vlh_demo5");
 	  else if (key == '6')
-	  	sprintf(fullPath, "%s%s", "saved_threads/", "demo6");
+	  	sprintf(fullPath, "%s%s", "saved_threads/", "vlh_demo6");
 	  else if (key == '7')
-	  	sprintf(fullPath, "%s%s", "saved_threads/", "demo7");
+	  	sprintf(fullPath, "%s%s", "saved_threads/", "vlh_demo7");
 	  else if (key == '8')
-	  	sprintf(fullPath, "%s%s", "saved_threads/", "demo8");
+	  	sprintf(fullPath, "%s%s", "saved_threads/", "vlh_demo8");
 	  else if (key == '9')
-	  	sprintf(fullPath, "%s%s", "saved_threads/", "demo9");
+	  	sprintf(fullPath, "%s%s", "saved_threads/", "vlh_demo9");
 	  else
-	  	sprintf(fullPath, "%s%s", "saved_threads/", "demo0");
+	  	sprintf(fullPath, "%s%s", "saved_threads/", "vlh_demo0");
     traj_reader.set_file(fullPath);
     if (traj_reader.read_threads_from_file() == 0) {
 			vector<Thread*> threads_out;
@@ -1098,9 +1098,9 @@ void initThread()
   int numInit = 4;//(3*3)/DEFAULT_REST_LENGTH;
   double noise_factor = 0.0;
 
-	double end_length = DEFAULT_REST_LENGTH;
-	double start = DEFAULT_REST_LENGTH;//8.0;
-	double end = DEFAULT_REST_LENGTH;//1.0;
+	double end_length = 6.0;//DEFAULT_REST_LENGTH;
+	double start = 6.0;//DEFAULT_REST_LENGTH;//8.0;
+	double end = 6.0;//DEFAULT_REST_LENGTH;//1.0;
 	double m = (start-end)/(numInit-1);
 
   vector<Vector3d> vertices;
