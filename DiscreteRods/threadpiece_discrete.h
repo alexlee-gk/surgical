@@ -6,7 +6,6 @@
 
 
 
-
 using namespace std;
 USING_PART_OF_NAMESPACE_EIGEN
 
@@ -15,6 +14,10 @@ static Matrix2d B = Matrix2d::Identity()*BEND_COEFF;
 static double TWIST_COEFF = BEND_COEFF*3.00;
 static double STRETCH_COEFF = 0.0;
 static double GRAV_COEFF = BEND_COEFF*1e-4;
+static double REPULSION_COEFF = 400.0;
+
+static double _DT = 10.0;
+static double _MASS = 400.0;
 
 static Matrix2d J = Matrix2d(Eigen::Rotation2Dd(M_PI/2.0));
 static Matrix2d JB = J*B;
@@ -80,6 +83,7 @@ class ThreadPiece
     double energy_curvature();
     double energy_twist();
     double energy_stretch();
+    double energy_repulsion();
 		double energy_grav();
 
 		//Energy Params

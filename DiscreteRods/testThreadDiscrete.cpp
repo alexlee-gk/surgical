@@ -20,7 +20,7 @@
 #include "thread_discrete.h"
 #include "trajectory_reader.h"
 #include "trajectory_recorder.h"
-
+#include "drawutils.h"
 
 // import most common Eigen types
 USING_PART_OF_NAMESPACE_EIGEN
@@ -31,9 +31,6 @@ void idle();
 void DrawStuff();
 void IdleAndDrawLeft();
 void DrawRight();
-void drawAxesBishop(Vector3d pos, Matrix3d rot);
-void drawAxesMaterial(Vector3d pos, Matrix3d rot);
-void drawSphere(Vector3d position, float radius, float color0, float color1, float color2);
 void DrawObjectsInEnv();
 void updateThreadPoints();
 void initThread();
@@ -602,18 +599,36 @@ void InitStuff (void)
 }
 
 void idle() {
-  double dt = 1;
-  double M =  10;
+  double dt = _DT;
+  double M = _MASS;
   double steps = 500;
   currentTime += dt;
-  thread->dynamic_step(dt, M, steps);
-  glutPostRedisplay();
+  thread->dynamic_step_until_convergence(dt, M, steps);
+  
+  if (print_mode_permanent || print_mode_instant) {
+  	vector<double> lengths;
+  	vector<double> edge_norms;
+  	thread->get_thread_data(lengths, edge_norms);
+  	
+  	cout << "lengths:";
+  	for (int i = 0; i<lengths.size(); i++)
+  		cout << " " << lengths[i];
+  	cout << endl;
+  	
+  	cout << "edge_norms:";
+  	for (int i = 0; i<edge_norms.size(); i++)
+  		cout << " " << edge_norms[i];
+  	cout << endl;
+  	
+  	print_mode_instant = false;
+  }
+  
+	glutPostRedisplay();
 }
 
 /* draw the helix shape */
 void DrawStuff (void)
 {
-  offset_3d = 10.0;
   IdleAndDrawLeft();
 }
 
@@ -775,7 +790,9 @@ void IdleAndDrawLeft (void)
     //  thread->minimize_energy();
     //}
 
-		//thread->adapt_links();
+#ifdef ADAPTIVE
+		thread->adapt_links();
+#endif
 
     //std::cout <<"ACTUAL END:\n" << thread->end_rot() << std::endl;
 
@@ -916,7 +933,19 @@ void IdleAndDrawLeft (void)
   pts_cpy[points.size()+1][1] = pts_cpy[points.size()][1]+rotations[1](1,0);
   pts_cpy[points.size()+1][2] = pts_cpy[points.size()][2]+rotations[1](2,0);
   twist_cpy[points.size()+1] = twist_cpy[points.size()]; //twist_cpy[points.size()]-(360.0/(2.0*M_PI))*zero_angle;
-
+/*
+	int pts_cpy_size = sizeof(pts_cpy)/sizeof(pts_cpy[0]);
+	int twist_cpy_size = sizeof(twist_cpy)/sizeof(twist_cpy[0]);
+	cout << "sizes: " << points.size() << " " << twist_angles.size() << " " << pts_cpy_size << " " << twist_cpy_size << endl;
+	cout << "pts_cpy: ";
+	for (int i=0; i<pts_cpy_size; i++)
+		cout << pts_cpy[i][0] << " ";
+	cout << endl;
+	cout << "twist_cpy: ";
+	for (int i=0; i<twist_cpy_size; i++)
+		cout << twist_cpy[i] << " ";
+	cout << endl;
+*/
   gleTwistExtrusion(20,
       contour,
       contour_norms,
@@ -929,7 +958,14 @@ void IdleAndDrawLeft (void)
 	if (examine_mode)
 		for (int i=0; i<points.size(); i++)
 			drawSphere(points[i]-zero_location, 0.7, 0.0, 0.5, 0.5);
-
+/*
+  vector<Vector3d> grads;
+  thread->get_thread_stretch_gradients(grads);
+  for (int i=2; i<points.size()-2; i++) {
+  	drawSphere(points[i]-zero_location, 0.01*grads[i].norm(), 1, 0, 0);
+	  drawArrow(points[i]-zero_location, -grads[i], 0, 1, 0);
+	}
+*/
   DrawObjectsInEnv();
 
   glPopMatrix ();
@@ -1050,65 +1086,6 @@ void DrawRight (void)
   glutSwapBuffers ();
 }
 
-void drawAxesBishop(Vector3d pos, Matrix3d rot) {
-	glPushMatrix();
-	double transform[] = { rot(0,0) , rot(1,0) , rot(2,0) , 0 ,
-												 rot(0,1) , rot(1,1) , rot(2,1) , 0 ,
-												 rot(0,2) , rot(1,2) , rot(2,2) , 0 ,
-												 pos(0)   , pos(1)   , pos(2)   , 1 };
-	glMultMatrixd(transform);
-	glBegin(GL_LINES);
-	glEnable(GL_LINE_SMOOTH);
-	glColor3d(1.0, 0.0, 0.0); //red
-	glVertex3f(-10.0, 0.0, 0.0); //x
-	glVertex3f(10.0, 0.0, 0.0);
-	glColor3d(0.0, 1.0, 0.0); //green
-	glVertex3f(0.0, 0.0, 0.0); //y
-	glVertex3f(0.0, 10.0, 0.0);
-	glColor3d(0.0, 0.0, 1.0); //blue
-	glVertex3f(0.0, 0.0, 0.0); //z
-	glVertex3f(0.0, 0.0, 10.0);
-	glEnd();
-	glPopMatrix();
-}
-
-void drawAxesMaterial(Vector3d pos, Matrix3d rot) {
-	glPushMatrix();
-	double transform[] = { rot(0,0) , rot(1,0) , rot(2,0) , 0 ,
-												 rot(0,1) , rot(1,1) , rot(2,1) , 0 ,
-												 rot(0,2) , rot(1,2) , rot(2,2) , 0 ,
-												 pos(0)   , pos(1)   , pos(2)   , 1 };
-	glMultMatrixd(transform);
-	glBegin(GL_LINES);
-	glEnable(GL_LINE_SMOOTH);
-	glColor3d(1.0, 1.0, 1.0);
-	glVertex3f(-10.0, 0.0, 0.0); //x
-	glVertex3f(10.0, 0.0, 0.0);
-	glColor3d(1.0, 1.0, 1.0);
-	glVertex3f(0.0, 0.0, 0.0); //y
-	glVertex3f(0.0, 10.0, 0.0);
-	glColor3d(1.0, 1.0, 1.0);
-	glVertex3f(0.0, 0.0, 0.0); //z
-	glVertex3f(0.0, 0.0, 10.0);
-	glEnd();
-	glPopMatrix();
-}
-
-void drawSphere(Vector3d position, float radius, float color0, float color1, float color2) {
-	glPushMatrix();
-	double transform[16] = {1,0,0,0,
-													0,1,0,0,
-													0,0,1,0,
-													position(0), position(1), position(2), 1};
-	glMultMatrixd(transform);
-	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glEnable(GL_COLOR_MATERIAL);
-  glColor3f(color0, color1, color2);
-  glutSolidSphere(radius, 20, 16);
-  //glFlush ();
-  glPopMatrix();
-}
-
 void DrawObjectsInEnv()
 {/*
   vector<Intersection_Object>* objects;
@@ -1168,12 +1145,12 @@ void updateThreadPoints()
 
 void initThread()
 {
-  int numInit = 5;//(3*3)/DEFAULT_REST_LENGTH;
+  int numInit = 8;//(3*3)/DEFAULT_REST_LENGTH;
   double noise_factor = 0.0;
 
-	double end_length = 5;
-	double start = 5.0; //DEFAULT_REST_LENGTH;//8.0;
-	double end = 5.0; //DEFAULT_REST_LENGTH;//1.0;
+	double end_length = 4.0;
+	double start = 4.0; //DEFAULT_REST_LENGTH;//8.0;
+	double end = 4.0; //DEFAULT_REST_LENGTH;//1.0;
 	double m = (start-end)/(numInit-1);
 
   vector<Vector3d> vertices;

@@ -58,7 +58,7 @@
 
 #define THREAD_RADIUS 0.2     /* MUST BE ATLEAST MAX_MOVEMENT_VERTICES */
 #define COLLISION_CHECKING true
-
+//#define ADAPTIVE
 
 using namespace std;
 USING_PART_OF_NAMESPACE_EIGEN
@@ -163,6 +163,9 @@ class Thread
     
     void dynamic_step_until_convergence(double step_size=0.01, double mass=100, int max_steps=500000);
     void dynamic_step(double step_size=0.01, double mass=100, int steps=500);
+
+		//Alex
+		void get_thread_stretch_gradients(vector<Vector3d>& grads);
 
     //energy minimization
     //
