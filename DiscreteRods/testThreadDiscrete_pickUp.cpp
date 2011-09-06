@@ -500,12 +500,22 @@ void processNormalKeys(unsigned char key, int x, int y)
         char nameString[256];
         sprintf(nameString, "sqp_%d", p); 
 
-        closedLoopSQPController(new World(*initialWorld), temp_worlds,
-            controls, traj_out, nameString);
+        //closedLoopSQPController(new World(*initialWorld), temp_worlds,
+        //    controls, traj_out, nameString);
 				//openLoopController(traj_in, controls, traj_out);
         
 				//setVisualizationData(traj_out);
-			
+				//break;
+				
+				for (int i = 0; i < temp_worlds.size(); i++) {
+					VectorXd u(16);
+					u.setZero();
+					temp_worlds[i]->applyRelativeControl(u);
+				}
+				
+				setVisualizationData(temp_worlds);
+				break;
+				
 				//TrajectoryRecorder rec(icc_traj_pert_path); //TODO output world trajectory file generated from control trajectory
 				TrajectoryRecorder rec("c2_test");
 				rec.start();
@@ -720,6 +730,12 @@ void checkMouseUpdate()
 	}
 }
 
+void processIdle()
+{
+	processHapticDevice();
+	checkMouseUpdate();
+}
+
 void drawStuff()
 {
 #ifdef VIEW3D
@@ -863,8 +879,7 @@ int main (int argc, char * argv[])
   glutKeyboardFunc(processNormalKeys);
   glutKeyboardUpFunc(processKeyUp);
   glutSpecialFunc(processSpecialKeys);
-  glutIdleFunc(processHapticDevice);
-  glutIdleFunc(checkMouseUpdate);
+  glutIdleFunc(processIdle);
  
 	
 	/* create popup menu */

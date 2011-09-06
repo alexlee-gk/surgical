@@ -17,7 +17,7 @@
 #include <queue>
 
 #ifdef ISOTROPIC 
-    #define MAX_MOVEMENT_VERTICES 0.2
+    #define MAX_MOVEMENT_VERTICES 0.1
     #define MAX_ROTATION_TWIST (M_PI/30.0)
     #define MOMENTUM_CONSTANT 0.0 /*how much of the last gradient do we use*/
 
@@ -141,7 +141,7 @@ class Thread
     void setState(VectorXd& state); 
     
     //void project_length_constraint_old();
-    bool project_length_constraint(int recursive_depth=250);
+    bool project_length_constraint(int recursive_depth=1000);
     //void project_length_constraint_slow();
 
     const Matrix3d& start_rot(void) const {return _thread_pieces.front()->material_frame();}

@@ -359,6 +359,18 @@ void World::applyRelativeControl(const vector<Control*>& controls, double thresh
 			cursor->attachDettach(limit_displacement);
 		
 	}
+	
+	for (int thread_ind = 0; thread_ind < threads.size(); thread_ind++) {
+		threads[thread_ind]->minimize_energy();
+	}
+	vector<EndEffector*> end_effs;
+	getObjects<EndEffector>(end_effs);
+	for (int ee_ind = 0; ee_ind < end_effs.size(); ee_ind++) {
+		EndEffector* ee = end_effs[ee_ind];
+		if (ee->isAttached()) {
+			ee->setTransform(ee->getThread()->positionAtConstraint(ee->constraint_ind), ee->getThread()->rotationAtConstraint(ee->constraint_ind));
+		}
+	}
 }
 
 //The control is effectively applied to the tip of the end effector
@@ -379,6 +391,18 @@ void World::applyRelativeControl(const VectorXd& relative_control, bool limit_di
 			cursor->openClose(limit_displacement);
 		if (relative_control(8*i+7))
 			cursor->attachDettach(limit_displacement);
+	}
+	
+	for (int thread_ind = 0; thread_ind < threads.size(); thread_ind++) {
+		threads[thread_ind]->minimize_energy();
+	}
+	vector<EndEffector*> end_effs;
+	getObjects<EndEffector>(end_effs);
+	for (int ee_ind = 0; ee_ind < end_effs.size(); ee_ind++) {
+		EndEffector* ee = end_effs[ee_ind];
+		if (ee->isAttached()) {
+			ee->setTransform(ee->getThread()->positionAtConstraint(ee->constraint_ind), ee->getThread()->rotationAtConstraint(ee->constraint_ind));
+		}
 	}
 }
 
