@@ -39,6 +39,7 @@
 #include "TexturedSphere.h"
 #include "Box.h"
 #include "Needle.h"
+#include "../Raven/Raven.h"
 
 #include "../IO/Control.h"
 #include "../IO/ControllerBase.h"
@@ -208,6 +209,8 @@ class World
 		vector<Cursor*> cursors; //control handler
 		vector<ThreadConstrained*> threads;
 		vector<EnvObject*> objs;
+	public:
+		Raven* raven;
 };
 
 void computeJacCord(World* w, int i, int size_each_state, VectorXd *du, MatrixXd *J);

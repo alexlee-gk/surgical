@@ -52,6 +52,8 @@ World::World(WorldManager* wm)
 	objs.push_back(new EndEffector(plane->getPosition() + Vector3d(35.0, EndEffector::short_handle_r, 0.0), (Matrix3d) AngleAxisd(-M_PI/2.0, Vector3d::UnitY()) * AngleAxisd(M_PI/2.0, Vector3d::UnitX()), this));
 	assert((TYPE_CAST<EndEffector*>(objs.back()))->constraint_ind == -1);
 	assert((TYPE_CAST<EndEffector*>(objs.back()))->constraint == -1);
+	
+	raven = new Raven();
 }
 
 World::World(const World& rhs, WorldManager* wm)
@@ -315,6 +317,7 @@ void World::draw(RenderMode render_mode)
 	}
 	if (collision_world != NULL)
 		collision_world->drawAllCollisions();
+	raven->draw();
 }
 
 void World::setTransformFromController(const vector<ControllerBase*>& controllers, bool limit_displacement)

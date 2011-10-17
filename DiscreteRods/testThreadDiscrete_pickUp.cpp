@@ -368,6 +368,19 @@ void processNormalKeys(unsigned char key, int x, int y)
     if (!world->objectAtIndex<Cursor>(1)->isAttached())
     	moveMouseToClosestEE(mouse1);
 		glutIgnoreKeyRepeat(1);
+	} else if (key == '1') {
+		world->raven->posMatrix[0][0][3] += 5.0;
+	} else if (key == '2') {
+		world->raven->posMatrix[0][1][3] += 5.0;
+	} else if (key == '3') {
+		world->raven->posMatrix[0][2][3] += 5.0;
+	} else if (key == '!') {
+		world->raven->posMatrix[0][0][3] -= 5.0;
+	} else if (key == '@') {
+		world->raven->posMatrix[0][1][3] -= 5.0;
+	} else if (key == '#') {
+		world->raven->posMatrix[0][2][3] -= 5.0;
+	
 	} else if (key == 's') {
     StateRecorder state_recorder;
     state_recorder.queryFileName();
@@ -987,7 +1000,7 @@ void initGL()
 	glShadeModel (GL_SMOOTH);
 
 	glMatrixMode (GL_PROJECTION);
-	glFrustum (-30.0, 30.0, -30.0, 30.0, 50.0, 500.0); // roughly, measured in centimeters
+	glFrustum (-30.0, 30.0, -30.0, 30.0, 50.0, 1000.0); // roughly, measured in centimeters
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
   // initialize lighting
@@ -1024,6 +1037,8 @@ void glutMenu(int ID) {
 }
 
 void interruptHandler(int sig) {
+  //added by alex
+  exit(0);
   cout << "Time since last interrupt: " << interruptTimer->elapsed() << endl; 
   if (interruptTimer->elapsed() < 0.1) exit(0);
   cout << "You need to hold ctrl-c to forcefully exit the program!" << endl;

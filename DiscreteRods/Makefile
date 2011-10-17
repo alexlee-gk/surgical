@@ -5,6 +5,7 @@ IO_DIR = IO
 ENV_DIR = EnvObjects
 COLLISIONS_DIR = Collisions
 MP_DIR = ../MotionPlanning
+RAVEN_DIR = Raven
 
 ifeq ($(MACHINE),Darwin)
     LIBS = -L/usr/lib/ -lglut -lgle -lIL -lGLU -L/opt/local/lib/ -lBulletCollision -lBulletDynamics -lLinearMath -lboost_thread-mt
@@ -15,7 +16,7 @@ ifeq ($(MACHINE),Darwin)
 else
     LIBS = -L/usr/lib/ -lglut -lgle -lIL -lGLU -lBulletDynamics -lBulletCollision -lboost_thread
     INCLUDES = -I/usr/local/include/ -I/usr/include/ -I $(UTILS_DIR)/ -I/usr/include/eigen2 -I/usr/local/include/bullet
-    COMPILEFLAG=
+    COMPILEFLAG= -Wno-write-strings
     LDFLAG=-lrt
 endif
 
@@ -32,7 +33,7 @@ DEBUG = -ggdb
 NDEBUG = #-DNDEBUG
 ISOTROPIC=-DISOTROPIC
 
-target: testThreadDiscrete_pickUp runExperiment runSmoothingExperiment
+target: testThreadDiscrete_pickUp
 
 #oldTestThreadDiscrete: testThreadDiscrete.cpp threadutils_discrete.o threadpiece_discrete.o thread_discrete.o ThreadConstrained.o drawUtils.o imageloader.o collisionUtils.o Mouse.o Haptic.o World.o Capsule.o Control.o Cursor.o EndEffector.o InfinitePlane.o TexturedSphere.o Box.o Needle.o thread_socket_interface.o UDPSocket.o Socket.o StateRecorder.o StateReader.o TrajectoryRecorder.o TrajectoryReader.o worldSQP.o trajectory_recorder.o trajectory_reader.o
 #	$(LD) $(INCLUDES) $(ISOTROPIC) $(DEBUG) $(NDEBUG) -o oldTestThreadDiscrete testThreadDiscrete.cpp threadutils_discrete.o threadpiece_discrete.o  thread_discrete.o ThreadConstrained.o drawUtils.o imageloader.o collisionUtils.o Mouse.o Haptic.o World.o Capsule.o Control.o Cursor.o EndEffector.o InfinitePlane.o TexturedSphere.o Box.o Needle.o thread_socket_interface.o UDPSocket.o Socket.o StateRecorder.o StateReader.o TrajectoryRecorder.o TrajectoryReader.o worldSQP.o trajectory_recorder.o trajectory_reader.o $(LIBS) $(PROFILER)
@@ -43,9 +44,8 @@ runSmoothingExperiment: runSmoothingExperiment.cpp threadutils_discrete.o thread
 runExperiment: runExperiment.cpp threadutils_discrete.o threadpiece_discrete.o thread_discrete.o ThreadConstrained.o drawUtils.o imageloader.o collisionUtils.o Mouse.o Haptic.o World.o CollisionWorld.o WorldManager.o Capsule.o Control.o Cursor.o EndEffector.o InfinitePlane.o TexturedSphere.o Box.o Needle.o thread_socket_interface.o UDPSocket.o Socket.o StateRecorder.o StateReader.o TrajectoryRecorder.o TrajectoryReader.o worldSQP.o clock.o
 	$(LD) $(INCLUDES) $(ISOTROPIC) $(DEBUG) $(NDEBUG) -o runExperiment runExperiment.cpp threadutils_discrete.o threadpiece_discrete.o  thread_discrete.o ThreadConstrained.o drawUtils.o imageloader.o collisionUtils.o Mouse.o Haptic.o World.o CollisionWorld.o WorldManager.o Capsule.o Control.o Cursor.o EndEffector.o InfinitePlane.o TexturedSphere.o Box.o Needle.o thread_socket_interface.o UDPSocket.o Socket.o StateRecorder.o StateReader.o TrajectoryRecorder.o TrajectoryReader.o worldSQP.o clock.o $(LIBS) $(PROFILER)
 
-
-testThreadDiscrete_pickUp: testThreadDiscrete_pickUp.cpp threadutils_discrete.o threadpiece_discrete.o thread_discrete.o ThreadConstrained.o drawUtils.o imageloader.o collisionUtils.o Mouse.o Haptic.o World.o CollisionWorld.o WorldManager.o Capsule.o Control.o Cursor.o EndEffector.o InfinitePlane.o TexturedSphere.o Box.o Needle.o thread_socket_interface.o UDPSocket.o Socket.o StateRecorder.o StateReader.o TrajectoryRecorder.o TrajectoryReader.o worldSQP.o clock.o
-	$(LD) $(INCLUDES) $(VISION_INCLUDES) $(ISOTROPIC) $(DEBUG) $(NDEBUG) -o testThreadDiscrete_pickUp testThreadDiscrete_pickUp.cpp threadutils_discrete.o threadpiece_discrete.o  thread_discrete.o ThreadConstrained.o drawUtils.o imageloader.o collisionUtils.o Mouse.o Haptic.o World.o CollisionWorld.o WorldManager.o Capsule.o Control.o Cursor.o EndEffector.o InfinitePlane.o TexturedSphere.o Box.o Needle.o thread_socket_interface.o UDPSocket.o Socket.o StateRecorder.o StateReader.o TrajectoryRecorder.o TrajectoryReader.o worldSQP.o clock.o $(LIBS) $(VISION_LIBS) $(PROFILER)
+testThreadDiscrete_pickUp: testThreadDiscrete_pickUp.cpp threadutils_discrete.o threadpiece_discrete.o thread_discrete.o ThreadConstrained.o drawUtils.o imageloader.o collisionUtils.o Mouse.o Haptic.o World.o CollisionWorld.o WorldManager.o Capsule.o Control.o Cursor.o EndEffector.o InfinitePlane.o TexturedSphere.o Box.o Needle.o utilFunc.o obj.o forKRaven.o invKRaven.o DrawObjRobot.o DrawRobot.o Raven.o thread_socket_interface.o UDPSocket.o Socket.o StateRecorder.o StateReader.o TrajectoryRecorder.o TrajectoryReader.o worldSQP.o clock.o
+	$(LD) $(INCLUDES) $(VISION_INCLUDES) $(ISOTROPIC) $(DEBUG) $(NDEBUG) -o testThreadDiscrete_pickUp testThreadDiscrete_pickUp.cpp threadutils_discrete.o threadpiece_discrete.o  thread_discrete.o ThreadConstrained.o drawUtils.o imageloader.o collisionUtils.o Mouse.o Haptic.o World.o CollisionWorld.o WorldManager.o Capsule.o Control.o Cursor.o EndEffector.o InfinitePlane.o TexturedSphere.o Box.o Needle.o utilFunc.o obj.o forKRaven.o invKRaven.o DrawObjRobot.o DrawRobot.o Raven.o thread_socket_interface.o UDPSocket.o Socket.o StateRecorder.o StateReader.o TrajectoryRecorder.o TrajectoryReader.o worldSQP.o clock.o $(LIBS) $(VISION_LIBS) $(PROFILER)
 
 recordThreadVideo: recordThreadVideo.cpp threadutils_discrete.o threadpiece_discrete.o thread_discrete.o trajectory_reader.o
 	$(LD) $(INCLUDES) $(VISION_INCLUDES) $(DEBUG) $(NDEBUG) -o recordThreadVideo recordThreadVideo.cpp threadutils_discrete.o threadpiece_discrete.o  thread_discrete.o trajectory_reader.o $(LIBS) $(VISION_LIBS)
@@ -125,7 +125,29 @@ Box.o: $(ENV_DIR)/Box.cpp
 Needle.o: $(ENV_DIR)/Needle.cpp
 	$(CC) $(INCLUDES) $(DEBUG) $(NDEBUG) -c $(ENV_DIR)/Needle.cpp $(PROFILER)
 
-	
+
+utilFunc.o: $(RAVEN_DIR)/utilFunc.cpp
+	$(CC) $(INCLUDES) $(DEBUG) $(NDEBUG) -c $(RAVEN_DIR)/utilFunc.cpp $(PROFILER)
+
+obj.o: $(RAVEN_DIR)/obj.cpp
+	$(CC) $(INCLUDES) $(DEBUG) $(NDEBUG) -c $(RAVEN_DIR)/obj.cpp $(PROFILER)
+
+forKRaven.o: $(RAVEN_DIR)/forKRaven.cpp
+	$(CC) $(INCLUDES) $(DEBUG) $(NDEBUG) -c $(RAVEN_DIR)/forKRaven.cpp $(PROFILER)
+
+invKRaven.o: $(RAVEN_DIR)/invKRaven.cpp
+	$(CC) $(INCLUDES) $(DEBUG) $(NDEBUG) -c $(RAVEN_DIR)/invKRaven.cpp $(PROFILER)
+
+DrawObjRobot.o: $(RAVEN_DIR)/DrawObjRobot.cpp
+	$(CC) $(INCLUDES) $(DEBUG) $(NDEBUG) -c $(RAVEN_DIR)/DrawObjRobot.cpp $(PROFILER)
+
+DrawRobot.o: $(RAVEN_DIR)/DrawRobot.cpp
+	$(CC) $(INCLUDES) $(DEBUG) $(NDEBUG) -c $(RAVEN_DIR)/DrawRobot.cpp $(PROFILER)
+
+Raven.o: $(RAVEN_DIR)/Raven.cpp
+	$(CC) $(INCLUDES) $(DEBUG) $(NDEBUG) -c $(RAVEN_DIR)/Raven.cpp $(PROFILER)
+
+
 drawUtils.o: $(UTILS_DIR)/drawUtils.cpp
 	$(CC) $(INCLUDES) $(DEBUG) $(NDEBUG) -c $(UTILS_DIR)/drawUtils.cpp $(PROFILER)
 	
