@@ -53,7 +53,7 @@ World::World(WorldManager* wm)
 	assert((TYPE_CAST<EndEffector*>(objs.back()))->constraint_ind == -1);
 	assert((TYPE_CAST<EndEffector*>(objs.back()))->constraint == -1);
 	
-	raven = new Raven();
+	//raven = new Raven();
 }
 
 World::World(const World& rhs, WorldManager* wm)
@@ -317,7 +317,7 @@ void World::draw(RenderMode render_mode)
 	}
 	if (collision_world != NULL)
 		collision_world->drawAllCollisions();
-	raven->draw();
+	//raven->draw();
 }
 
 void World::setTransformFromController(const vector<ControllerBase*>& controllers, bool limit_displacement)

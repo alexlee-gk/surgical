@@ -117,6 +117,8 @@ Control *control0, *control1;
 World *world;
 WorldManager* test_world_manager;
 
+Vector3d start_ray = Vector3d::Zero(), end_ray = Vector3d::Zero();
+
 //drawing SQP results
 vector<vector<World*> > drawWorlds;
 int drawInd = 0;
@@ -196,6 +198,14 @@ void processMiddle(int x, int y)
 
 void mouseMotion (int x, int y)
 {
+  GLdouble objX, objY, objZ;
+	gluUnProject(x, y, 0, model_view, projection, viewport, &objX, &objY, &objZ);
+	start_ray = Vector3d(objX, objY, objZ);
+	cout << "start_ray " << start_ray.transpose() << endl;
+	gluUnProject(x, y, 1, model_view, projection, viewport, &objX, &objY, &objZ);
+	end_ray = Vector3d(objX, objY, objZ);
+	cout << "end_ray " << end_ray.transpose() << endl;
+	
   if (pressed_mouse_button == GLUT_LEFT_BUTTON) {
    	processLeft(x, y);
   } else if (pressed_mouse_button == GLUT_MIDDLE_BUTTON) {
@@ -212,6 +222,14 @@ void mouseMotion (int x, int y)
 
 void processMouse(int button, int state, int x, int y)
 {
+	GLdouble objX, objY, objZ;
+	gluUnProject(x, y, 0, model_view, projection, viewport, &objX, &objY, &objZ);
+	start_ray = Vector3d(objX, objY, objZ);
+	cout << "start_ray " << start_ray.transpose() << endl;
+	gluUnProject(x, y, 1, model_view, projection, viewport, &objX, &objY, &objZ);
+	end_ray = Vector3d(objX, objY, objZ);
+	cout << "end_ray " << end_ray.transpose() << endl;
+	
 	if (state == GLUT_DOWN) {
     pressed_mouse_button = button;
     if (button == GLUT_LEFT_BUTTON) {
@@ -713,6 +731,8 @@ void drawStuff()
 #endif
   glRotatef (rotate_frame[1], 1.0, 0.0, 0.0);
   glRotatef (rotate_frame[0], 0.0, 1.0, 0.0);
+  
+  drawArrow(start_ray, end_ray-start_ray);
   
   glLightfv (GL_LIGHT0, GL_POSITION, lightOnePosition);
 	glLightfv (GL_LIGHT1, GL_POSITION, lightTwoPosition);
